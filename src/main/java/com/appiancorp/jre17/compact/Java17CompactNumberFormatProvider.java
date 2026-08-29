@@ -4,31 +4,37 @@ import java.text.NumberFormat;
 import java.text.spi.NumberFormatProvider;
 import java.util.Locale;
 
-// stub implementation for jre17 compatibility
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
+// Delegates to the repackaged JRE locale provider stack (see
+// com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider) instead
+// of the real JRE-internal implementation, which JDK 17 no longer ships.
 public class Java17CompactNumberFormatProvider extends NumberFormatProvider {
+
+  private final NumberFormatProvider delegate = LocaleProviderAdapter.forJRE().getNumberFormatProvider();
 
   @Override
   public Locale[] getAvailableLocales() {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getAvailableLocales();
   }
 
   @Override
   public NumberFormat getCurrencyInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getCurrencyInstance(locale);
   }
 
   @Override
   public NumberFormat getIntegerInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getIntegerInstance(locale);
   }
 
   @Override
   public NumberFormat getNumberInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getNumberInstance(locale);
   }
 
   @Override
   public NumberFormat getPercentInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getPercentInstance(locale);
   }
 }

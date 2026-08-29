@@ -4,31 +4,37 @@ import java.text.BreakIterator;
 import java.text.spi.BreakIteratorProvider;
 import java.util.Locale;
 
-// stub implementation for jre17 compatibility
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
+// Delegates to the repackaged JRE locale provider stack (see
+// com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider) instead
+// of the real JRE-internal implementation, which JDK 17 no longer ships.
 public class Java17CompactBreakIteratorProvider extends BreakIteratorProvider {
+
+  private final BreakIteratorProvider delegate = LocaleProviderAdapter.forJRE().getBreakIteratorProvider();
 
   @Override
   public Locale[] getAvailableLocales() {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getAvailableLocales();
   }
 
   @Override
   public BreakIterator getWordInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getWordInstance(locale);
   }
 
   @Override
   public BreakIterator getLineInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getLineInstance(locale);
   }
 
   @Override
   public BreakIterator getCharacterInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getCharacterInstance(locale);
   }
 
   @Override
   public BreakIterator getSentenceInstance(Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getSentenceInstance(locale);
   }
 }

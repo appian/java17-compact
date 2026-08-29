@@ -4,26 +4,32 @@ import java.text.DateFormat;
 import java.text.spi.DateFormatProvider;
 import java.util.Locale;
 
-// stub implementation for jre17 compatibility
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
+// Delegates to the repackaged JRE locale provider stack (see
+// com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider) instead
+// of the real JRE-internal implementation, which JDK 17 no longer ships.
 public class Java17CompactDateFormatProvider extends DateFormatProvider {
+
+  private final DateFormatProvider delegate = LocaleProviderAdapter.forJRE().getDateFormatProvider();
 
   @Override
   public Locale[] getAvailableLocales() {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getAvailableLocales();
   }
 
   @Override
   public DateFormat getTimeInstance(int style, Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getTimeInstance(style, locale);
   }
 
   @Override
   public DateFormat getDateInstance(int style, Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getDateInstance(style, locale);
   }
 
   @Override
   public DateFormat getDateTimeInstance(int dateStyle, int timeStyle, Locale locale) {
-    throw new UnsupportedOperationException("Not implemented yet");
+    return delegate.getDateTimeInstance(dateStyle, timeStyle, locale);
   }
 }
