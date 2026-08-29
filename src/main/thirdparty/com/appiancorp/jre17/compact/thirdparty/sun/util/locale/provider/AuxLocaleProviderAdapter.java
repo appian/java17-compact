@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -45,8 +45,8 @@ import java.util.spi.CurrencyNameProvider;
 import java.util.spi.LocaleNameProvider;
 import java.util.spi.LocaleServiceProvider;
 import java.util.spi.TimeZoneNameProvider;
-import sun.text.spi.JavaTimeDateTimePatternProvider;
-import sun.util.spi.CalendarProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.spi.JavaTimeDateTimePatternProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.spi.CalendarProvider;
 
 /**
  * An abstract parent class for the

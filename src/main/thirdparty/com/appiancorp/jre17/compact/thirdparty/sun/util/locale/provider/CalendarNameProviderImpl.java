@@ -22,7 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import static java.util.Calendar.*;
 import java.util.Comparator;
@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.spi.CalendarNameProvider;
-import sun.util.calendar.CalendarSystem;
-import sun.util.calendar.Era;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.calendar.CalendarSystem;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.calendar.Era;
 
 /**
  * Concrete implementation of the {@link java.util.spi.CalendarNameProvider

@@ -38,7 +38,7 @@
  * Taligent is a registered trademark of Taligent, Inc.
  */
 
-package sun.text;
+package com.appiancorp.jre17.compact.thirdparty.sun.text;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -46,8 +46,8 @@ import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.MissingResourceException;
-import sun.text.CompactByteArray;
-import sun.text.SupplementaryCharacterData;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.CompactByteArray;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.SupplementaryCharacterData;
 
 /**
  * <p>A subclass of BreakIterator whose behavior is specified using a list of rules.</p>

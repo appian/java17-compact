@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.io.InputStream;
 import java.security.AccessController;
@@ -31,8 +31,11 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+
+import com.appiancorp.jre17.compact.util.AppianResourceBundleState;
 
 /**
  * BreakIteratorResourceBundle is an abstract class for loading BreakIterator
@@ -47,12 +50,36 @@ import java.util.Set;
  * implementation class of this class.
  */
 
-public abstract class BreakIteratorResourceBundle extends ResourceBundle {
+public abstract class BreakIteratorResourceBundle extends ResourceBundle
+        implements AppianResourceBundleState {
     // If any keys that are not for data names are added to BreakIteratorInfo*,
     // those keys must be added to NON_DATA_KEYS.
     private static final Set<String> NON_DATA_KEYS = Set.of("BreakIteratorClasses");
 
     private volatile Set<String> keys;
+
+    // Modified by Appian Corp., 2026: see AppianResourceBundleState.
+    private volatile Locale appianLocale;
+
+    @Override
+    public Locale getLocale() {
+        return appianLocale;
+    }
+
+    @Override
+    public void appianSetLocale(Locale locale) {
+        this.appianLocale = locale;
+    }
+
+    @Override
+    public void appianSetParent(ResourceBundle parent) {
+        setParent(parent);
+    }
+
+    @Override
+    public ResourceBundle appianGetParent() {
+        return this.parent;
+    }
 
     /**
      * Returns an instance of the corresponding {@code BreakIteratorInfo} (basename).

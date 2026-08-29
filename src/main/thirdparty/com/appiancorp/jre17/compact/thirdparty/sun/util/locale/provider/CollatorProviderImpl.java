@@ -38,7 +38,7 @@
  * Taligent is a registered trademark of Taligent, Inc.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.text.Collator;
 import java.text.ParseException;

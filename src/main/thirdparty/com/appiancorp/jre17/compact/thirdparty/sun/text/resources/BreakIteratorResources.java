@@ -23,10 +23,10 @@
  * questions.
  */
 
-package sun.text.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources;
 
 import java.util.ResourceBundle;
-import sun.util.resources.BreakIteratorResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.BreakIteratorResourceBundle;
 
 public class BreakIteratorResources extends BreakIteratorResourceBundle {
     @Override

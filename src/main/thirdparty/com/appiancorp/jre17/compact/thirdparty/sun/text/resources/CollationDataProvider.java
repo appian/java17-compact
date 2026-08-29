@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.text.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources;
 
 import java.util.spi.ResourceBundleProvider;
 

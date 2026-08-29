@@ -36,7 +36,7 @@
  *
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 /**
  * CollationRules contains the default en_US collation rules as a base
  * for building other collation tables.

@@ -38,7 +38,7 @@
  * Taligent is a registered trademark of Taligent, Inc.
  */
 
-package sun.text;
+package com.appiancorp.jre17.compact.thirdparty.sun.text;
 
 import java.text.CharacterIterator;
 import java.util.ArrayList;

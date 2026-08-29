@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.util.Map;
 

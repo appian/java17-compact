@@ -23,13 +23,13 @@
  * questions.
  */
 
-package sun.security.action;
+package com.appiancorp.jre17.compact.thirdparty.sun.security.action;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Locale;
 import java.util.Properties;
-import sun.security.util.Debug;
+import com.appiancorp.jre17.compact.thirdparty.sun.security.util.Debug;
 
 /**
  * A convenience class for retrieving the string value of a system

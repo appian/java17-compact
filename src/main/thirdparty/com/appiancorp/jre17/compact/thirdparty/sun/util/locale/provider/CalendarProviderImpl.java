@@ -23,13 +23,13 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
-import sun.util.spi.CalendarProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.spi.CalendarProvider;
 
 /**
  * Concrete implementation of the  {@link sun.util.spi.CalendarProvider

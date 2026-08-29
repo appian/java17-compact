@@ -36,13 +36,13 @@
  *
  */
 
-package sun.util.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ext;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-import sun.util.locale.provider.LocaleProviderAdapter;
-import sun.util.locale.provider.ResourceBundleBasedAdapter;
-import sun.util.resources.TimeZoneNamesBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.ResourceBundleBasedAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.TimeZoneNamesBundle;
 
 public final class TimeZoneNames_zh_HK extends TimeZoneNamesBundle {
 

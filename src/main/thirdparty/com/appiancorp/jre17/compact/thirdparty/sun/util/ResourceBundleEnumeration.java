@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util;
+package com.appiancorp.jre17.compact.thirdparty.sun.util;
 
 import java.util.Enumeration;
 import java.util.Iterator;

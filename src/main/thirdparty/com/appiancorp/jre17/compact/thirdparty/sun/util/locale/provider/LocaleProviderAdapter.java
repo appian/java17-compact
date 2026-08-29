@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.spi.BreakIteratorProvider;
@@ -48,9 +50,9 @@ import java.util.spi.CurrencyNameProvider;
 import java.util.spi.LocaleNameProvider;
 import java.util.spi.LocaleServiceProvider;
 import java.util.spi.TimeZoneNameProvider;
-import sun.security.action.GetPropertyAction;
-import sun.text.spi.JavaTimeDateTimePatternProvider;
-import sun.util.spi.CalendarProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.security.action.GetPropertyAction;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.spi.JavaTimeDateTimePatternProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.spi.CalendarProvider;
 
 import static java.lang.System.*;
 
@@ -65,11 +67,26 @@ public abstract class LocaleProviderAdapter {
      * Adapter type.
      */
     public enum Type {
-        JRE("sun.util.locale.provider.JRELocaleProviderAdapter", "sun.util.resources", "sun.text.resources"),
+        // Modified by Appian Corp., 2026: JRE/FALLBACK's class-name and
+        // resource-bundle-package strings repackaged to
+        // com.appiancorp.jre17.compact.thirdparty.sun.*, since
+        // LocaleData.getBundle(type.getUtilResourcesPackage() + ".X", locale)
+        // resolves bundle classes by string-concatenated Class.forName using
+        // these values. CLDR/SPI/HOST are left as their original (and
+        // therefore unresolvable) values -- this library never ships
+        // CLDRLocaleProviderAdapter/SPILocaleProviderAdapter/
+        // HostLocaleProviderAdapter and never selects those adapter types
+        // (java.locale.providers=JRE only), so forType(Type.CLDR/SPI/HOST) is
+        // simply never called and these strings are never resolved.
+        JRE("com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.JRELocaleProviderAdapter",
+            "com.appiancorp.jre17.compact.thirdparty.sun.util.resources",
+            "com.appiancorp.jre17.compact.thirdparty.sun.text.resources"),
         CLDR("sun.util.cldr.CLDRLocaleProviderAdapter", "sun.util.resources.cldr", "sun.text.resources.cldr"),
         SPI("sun.util.locale.provider.SPILocaleProviderAdapter"),
         HOST("sun.util.locale.provider.HostLocaleProviderAdapter"),
-        FALLBACK("sun.util.locale.provider.FallbackLocaleProviderAdapter", "sun.util.resources", "sun.text.resources");
+        FALLBACK("com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.FallbackLocaleProviderAdapter",
+            "com.appiancorp.jre17.compact.thirdparty.sun.util.resources",
+            "com.appiancorp.jre17.compact.thirdparty.sun.text.resources");
 
         private final String CLASSNAME;
         private final String UTIL_RESOURCES_PACKAGE;

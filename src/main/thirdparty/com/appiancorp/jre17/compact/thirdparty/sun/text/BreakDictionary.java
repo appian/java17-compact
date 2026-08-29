@@ -37,13 +37,13 @@
  * This notice and attribution to Taligent may not be removed.
  * Taligent is a registered trademark of Taligent, Inc.
  */
-package sun.text;
+package com.appiancorp.jre17.compact.thirdparty.sun.text;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.MissingResourceException;
-import sun.text.CompactByteArray;
-import sun.text.SupplementaryCharacterData;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.CompactByteArray;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.SupplementaryCharacterData;
 
 /**
  * This is the class that represents the list of known words used by

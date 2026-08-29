@@ -25,7 +25,7 @@
 
 
 
-package sun.text.spi;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.spi;
 
 import java.util.Locale;
 import java.util.spi.LocaleServiceProvider;

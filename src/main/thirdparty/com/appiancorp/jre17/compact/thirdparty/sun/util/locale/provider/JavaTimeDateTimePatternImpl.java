@@ -22,11 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.util.Locale;
 import java.util.Set;
-import sun.text.spi.JavaTimeDateTimePatternProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.spi.JavaTimeDateTimePatternProvider;
 
 /**
  * Concrete implementation of the {@link sun.text.spi.JavaTimeDateTimePatternProvider

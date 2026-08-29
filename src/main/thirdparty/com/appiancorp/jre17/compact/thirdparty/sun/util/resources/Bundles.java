@@ -21,6 +21,8 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
 /*
@@ -38,7 +40,7 @@
  *
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -56,10 +58,18 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.spi.ResourceBundleProvider;
-import jdk.internal.access.JavaUtilResourceBundleAccess;
-import jdk.internal.access.SharedSecrets;
+
+import com.appiancorp.jre17.compact.util.AppianResourceBundleState;
 
 /**
+ * Modified by Appian Corp., 2026: replaced the jdk.internal.access.
+ * SharedSecrets/JavaUtilResourceBundleAccess bridge (only reachable from
+ * within java.base) with AppianResourceBundleState, which every
+ * ResourceBundle base class in this codebase (OpenListResourceBundle,
+ * ParallelListResourceBundle, BreakIteratorResourceBundle,
+ * AppianListResourceBundle) implements by tracking its own locale/parent
+ * state and calling the inherited protected ResourceBundle.setParent(...)
+ * directly -- no reflection, no --add-opens required.
  */
 public abstract class Bundles {
 
@@ -75,9 +85,6 @@ public abstract class Bundles {
             @Override
             public String toString() { return "NONEXISTENT_BUNDLE"; }
         };
-
-    private static final JavaUtilResourceBundleAccess bundleAccess
-                            = SharedSecrets.getJavaUtilResourceBundleAccess();
 
     /**
      * The cache is a map from cache keys (with bundle base name, locale, and
@@ -136,8 +143,11 @@ public abstract class Bundles {
                 = strategy.getResourceBundleProviderType(baseName, targetLocale);
         if (type != null) {
             @SuppressWarnings("unchecked")
+            // Modified by Appian Corp., 2026: see the loadInstalled(...)
+            // comment on JRELocaleProviderAdapter.createSupportedLocaleString
+            // -- same fix, same reason.
             ServiceLoader<ResourceBundleProvider> providers
-                = (ServiceLoader<ResourceBundleProvider>) ServiceLoader.loadInstalled(type);
+                = (ServiceLoader<ResourceBundleProvider>) ServiceLoader.load(type, Bundles.class.getClassLoader());
             cacheKey.setProviders(providers);
         }
 
@@ -172,7 +182,7 @@ public abstract class Bundles {
             if (bundle == NONEXISTENT_BUNDLE) {
                 return parent;
             }
-            if (bundleAccess.getParent(bundle) == parent) {
+            if (appianGetParent(bundle) == parent) {
                 return bundle;
             }
             // Remove bundle from the cache.
@@ -206,7 +216,7 @@ public abstract class Bundles {
                     if (c != null && ResourceBundle.class.isAssignableFrom(c)) {
                         @SuppressWarnings("unchecked")
                         Class<ResourceBundle> bundleClass = (Class<ResourceBundle>) c;
-                        bundle = bundleAccess.newResourceBundle(bundleClass);
+                        bundle = appianNewResourceBundle(bundleClass);
                     }
                     if (bundle == null) {
                         var otherBundleName = toOtherBundleName(baseName, bundleName, targetLocale);
@@ -215,7 +225,7 @@ public abstract class Bundles {
                             if (c != null && ResourceBundle.class.isAssignableFrom(c)) {
                                 @SuppressWarnings("unchecked")
                                 Class<ResourceBundle> bundleClass = (Class<ResourceBundle>) c;
-                                bundle = bundleAccess.newResourceBundle(bundleClass);
+                                bundle = appianNewResourceBundle(bundleClass);
                             }
                         }
                     }
@@ -236,13 +246,38 @@ public abstract class Bundles {
             return parent;
         }
 
-        if (parent != null && bundleAccess.getParent(bundle) == null) {
-            bundleAccess.setParent(bundle, parent);
+        if (parent != null && appianGetParent(bundle) == null) {
+            appianSetParent(bundle, parent);
         }
-        bundleAccess.setLocale(bundle, targetLocale);
-        bundleAccess.setName(bundle, baseName);
+        appianSetLocale(bundle, targetLocale);
         bundle = putBundleInCache(cacheKey, bundle);
         return bundle;
+    }
+
+    // Modified by Appian Corp., 2026: helpers dispatching through
+    // AppianResourceBundleState instead of jdk.internal.access.SharedSecrets
+    // -- see the class-level comment above. setName is a no-op: nothing in
+    // this codebase reads ResourceBundle.getBaseBundleName()/name back.
+    private static ResourceBundle appianGetParent(ResourceBundle bundle) {
+        return ((AppianResourceBundleState) bundle).appianGetParent();
+    }
+
+    private static void appianSetParent(ResourceBundle bundle, ResourceBundle parent) {
+        ((AppianResourceBundleState) bundle).appianSetParent(parent);
+    }
+
+    private static void appianSetLocale(ResourceBundle bundle, Locale locale) {
+        ((AppianResourceBundleState) bundle).appianSetLocale(locale);
+    }
+
+    private static ResourceBundle appianNewResourceBundle(Class<ResourceBundle> bundleClass) {
+        try {
+            @SuppressWarnings("deprecation")
+            var constructor = bundleClass.getConstructor();
+            return constructor.newInstance();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static void cleanupCache() {

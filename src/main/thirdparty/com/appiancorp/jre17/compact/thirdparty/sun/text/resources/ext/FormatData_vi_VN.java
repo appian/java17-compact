@@ -40,9 +40,9 @@
  * http://oss.software.ibm.com/cvs/icu/icu/source/data/locales/vi.txt?rev=1.38
  */
 
-package sun.text.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources.ext;
 
-import sun.util.resources.ParallelListResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ParallelListResourceBundle;
 
 public class FormatData_vi_VN extends ParallelListResourceBundle {
     /**

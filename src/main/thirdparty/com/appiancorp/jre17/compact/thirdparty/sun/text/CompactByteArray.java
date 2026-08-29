@@ -36,7 +36,7 @@
  *
  */
 
-package sun.text;
+package com.appiancorp.jre17.compact.thirdparty.sun.text;
 
 
 /**

@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
-package build.tools.generatebreakiteratordata;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.generatebreakiteratordata;
 
 import java.util.Enumeration;
 import java.util.ListResourceBundle;
@@ -86,13 +88,16 @@ public class GenerateBreakIteratorData {
         String[] classNames;
         ResourceBundle rules, info;
 
+        // Modified by Appian Corp., 2026: repackaged from "sun.text.resources"
+        // -- used in Class.forName(...) via localizedBundleName() below, a
+        // string literal not caught by the mechanical package/import sed pass.
         info = (ResourceBundle) Class.forName(
-            localizedBundleName("sun.text.resources", "BreakIteratorInfo")).getDeclaredConstructor().newInstance();
+            localizedBundleName("com.appiancorp.jre17.compact.thirdparty.sun.text.resources", "BreakIteratorInfo")).getDeclaredConstructor().newInstance();
 
         classNames = info.getStringArray("BreakIteratorClasses");
 
         rules = (ResourceBundle) Class.forName(
-            localizedBundleName("sun.text.resources", "BreakIteratorRules")).getDeclaredConstructor().newInstance();
+            localizedBundleName("com.appiancorp.jre17.compact.thirdparty.sun.text.resources", "BreakIteratorRules")).getDeclaredConstructor().newInstance();
 
         if (info.containsKey("CharacterData")) {
             generateDataFile(info.getString("CharacterData"),

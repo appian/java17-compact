@@ -38,7 +38,7 @@
  *
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.util.Map;
 import java.util.LinkedHashMap;

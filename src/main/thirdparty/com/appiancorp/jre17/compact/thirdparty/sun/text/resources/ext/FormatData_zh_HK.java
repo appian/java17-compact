@@ -38,13 +38,13 @@
  *
  */
 
-package sun.text.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources.ext;
 
-import sun.util.resources.ParallelListResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ParallelListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import sun.util.locale.provider.LocaleProviderAdapter;
-import sun.util.locale.provider.ResourceBundleBasedAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.ResourceBundleBasedAdapter;
 
 public class FormatData_zh_HK extends ParallelListResourceBundle {
 

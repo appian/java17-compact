@@ -23,13 +23,13 @@
  * questions.
  */
 
-package sun.util.calendar;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.calendar;
 
 import java.security.AccessController;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import sun.security.action.GetPropertyAction;
+import com.appiancorp.jre17.compact.thirdparty.sun.security.action.GetPropertyAction;
 
 /**
  *

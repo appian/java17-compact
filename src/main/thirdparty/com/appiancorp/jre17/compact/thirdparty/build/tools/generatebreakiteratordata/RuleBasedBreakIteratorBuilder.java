@@ -23,7 +23,7 @@
  * questions.
  */
 
-package build.tools.generatebreakiteratordata;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.generatebreakiteratordata;
 
 import java.io.*;
 import java.util.Enumeration;
@@ -31,7 +31,7 @@ import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.zip.CRC32;
-import sun.text.CompactByteArray;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.CompactByteArray;
 
 /**
  * This class has the job of constructing a RuleBasedBreakIterator from a

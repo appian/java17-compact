@@ -35,8 +35,8 @@ package #Package#;
 
 import java.util.HashMap;
 import java.util.Map;
-import sun.util.locale.provider.LocaleDataMetaInfo;
-import static sun.util.locale.provider.LocaleProviderAdapter.Type;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleDataMetaInfo;
+import static com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter.Type;
 
 public class #Lang#LocaleDataMetaInfo implements LocaleDataMetaInfo {
 

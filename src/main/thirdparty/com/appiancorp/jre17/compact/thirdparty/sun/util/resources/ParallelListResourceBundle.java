@@ -23,19 +23,22 @@
  * questions.
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.util.AbstractSet;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicMarkableReference;
+
+import com.appiancorp.jre17.compact.util.AppianResourceBundleState;
 
 /**
  * ParallelListResourceBundle is another variant of ListResourceBundle
@@ -45,7 +48,8 @@ import java.util.concurrent.atomic.AtomicMarkableReference;
  *
  * @author Masayoshi Okutsu
  */
-public abstract class ParallelListResourceBundle extends ResourceBundle {
+public abstract class ParallelListResourceBundle extends ResourceBundle
+        implements AppianResourceBundleState {
     private volatile ConcurrentMap<String, Object> lookup;
     private volatile Set<String> keyset;
     private final AtomicMarkableReference<Object[][]> parallelContents
@@ -56,6 +60,29 @@ public abstract class ParallelListResourceBundle extends ResourceBundle {
      * implicit.)
      */
     protected ParallelListResourceBundle() {
+    }
+
+    // Modified by Appian Corp., 2026: see AppianResourceBundleState.
+    private volatile Locale appianLocale;
+
+    @Override
+    public Locale getLocale() {
+        return appianLocale;
+    }
+
+    @Override
+    public void appianSetLocale(Locale locale) {
+        this.appianLocale = locale;
+    }
+
+    @Override
+    public void appianSetParent(ResourceBundle parent) {
+        setParent(parent);
+    }
+
+    @Override
+    public ResourceBundle appianGetParent() {
+        return this.parent;
     }
 
     /**

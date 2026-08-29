@@ -23,11 +23,11 @@
  * questions.
  */
 
-package sun.util.resources.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources.provider;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
-import sun.util.resources.LocaleData;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.LocaleData;
 
 /**
  * Service Provider for loading locale data resource bundles in jdk.localedata

@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
-package sun.util.calendar;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.calendar;
 
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,7 +79,10 @@ public abstract class CalendarSystem {
     // Map of calendar names and CalendarSystem instances
     private static ConcurrentMap<String,CalendarSystem> calendars;
 
-    private static final String PACKAGE_NAME = "sun.util.calendar.";
+    // Modified by Appian Corp., 2026: repackaged from "sun.util.calendar."
+    // -- used in Class.forName(PACKAGE_NAME + name) below, a string literal
+    // not caught by the mechanical package/import sed pass.
+    private static final String PACKAGE_NAME = "com.appiancorp.jre17.compact.thirdparty.sun.util.calendar.";
 
     private static final String[] namePairs = {
         "gregorian", "Gregorian",

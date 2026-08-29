@@ -23,11 +23,11 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.util.List;
 import java.util.Locale;
-import sun.util.resources.LocaleData;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.LocaleData;
 
 /**
  * Accessor for LocaleData

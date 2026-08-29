@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.lang.ref.SoftReference;
 import java.util.LinkedList;
@@ -35,9 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.spi.TimeZoneNameProvider;
-import sun.util.calendar.ZoneInfo;
-import sun.util.cldr.CLDRLocaleProviderAdapter;
-import static sun.util.locale.provider.LocaleProviderAdapter.Type;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.calendar.ZoneInfo;
 
 /**
  * Utility class that deals with the localized time zone names
@@ -167,10 +167,16 @@ public final class TimeZoneNameUtility {
 
     /**
      * Returns the canonical ID for the given ID
+     *
+     * Modified by Appian Corp., 2026: the real JDK delegates to
+     * sun.util.cldr.CLDRLocaleProviderAdapter.canonicalTZID, which we don't
+     * ship (this library only supports Type.JRE). ZoneInfo.getAliasTable()
+     * is backed by the same IANA tzdata Link entries this library already
+     * compiles into tzdb.dat, and gives the same category of timezone-ID
+     * alias resolution.
      */
     public static Optional<String> canonicalTZID(String id) {
-        return ((CLDRLocaleProviderAdapter)LocaleProviderAdapter.forType(Type.CLDR))
-                    .canonicalTZID(id);
+        return Optional.ofNullable(ZoneInfo.getAliasTable().get(id));
     }
 
     private static String[] retrieveDisplayNamesImpl(String id, Locale locale) {

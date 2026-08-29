@@ -38,9 +38,9 @@
  *
  */
 
-package sun.text.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources;
 
-import sun.util.resources.ParallelListResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ParallelListResourceBundle;
 
 public class FormatData_en extends ParallelListResourceBundle {
     /**

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.calendar;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.calendar;
 
 import java.util.TimeZone;
 

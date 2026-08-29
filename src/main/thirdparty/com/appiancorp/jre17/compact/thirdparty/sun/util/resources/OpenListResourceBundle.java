@@ -38,15 +38,17 @@
  *
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
-import sun.util.ResourceBundleEnumeration;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.ResourceBundleEnumeration;
+import com.appiancorp.jre17.compact.util.AppianResourceBundleState;
 
 /**
  * Subclass of <code>ResourceBundle</code> which mimics
@@ -58,12 +60,39 @@ import sun.util.ResourceBundleEnumeration;
  * adds a method createMap which allows subclasses to
  * use specialized Map implementations.
  */
-public abstract class OpenListResourceBundle extends ResourceBundle {
+public abstract class OpenListResourceBundle extends ResourceBundle
+        implements AppianResourceBundleState {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
      */
     protected OpenListResourceBundle() {
+    }
+
+    // Modified by Appian Corp., 2026: see AppianResourceBundleState. The
+    // real JDK's ResourceBundle.locale/parent fields have no accessor
+    // outside jdk.internal.access.SharedSecrets, so we track our own copy
+    // here and forward setParent(...) (protected, callable from a subclass).
+    private volatile Locale appianLocale;
+
+    @Override
+    public Locale getLocale() {
+        return appianLocale;
+    }
+
+    @Override
+    public void appianSetLocale(Locale locale) {
+        this.appianLocale = locale;
+    }
+
+    @Override
+    public void appianSetParent(ResourceBundle parent) {
+        setParent(parent);
+    }
+
+    @Override
+    public ResourceBundle appianGetParent() {
+        return this.parent;
     }
 
     // Implements java.util.ResourceBundle.handleGetObject; inherits javadoc specification.

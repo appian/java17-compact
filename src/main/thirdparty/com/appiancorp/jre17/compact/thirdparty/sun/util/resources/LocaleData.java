@@ -38,7 +38,7 @@
  *
  */
 
-package sun.util.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -52,11 +52,11 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.spi.ResourceBundleProvider;
-import sun.util.locale.provider.JRELocaleProviderAdapter;
-import sun.util.locale.provider.LocaleProviderAdapter;
-import static sun.util.locale.provider.LocaleProviderAdapter.Type.CLDR;
-import static sun.util.locale.provider.LocaleProviderAdapter.Type.JRE;
-import sun.util.locale.provider.ResourceBundleBasedAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.JRELocaleProviderAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+import static com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter.Type.CLDR;
+import static com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter.Type.JRE;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.ResourceBundleBasedAdapter;
 
 /**
  * Provides information about and access to resource bundles in the

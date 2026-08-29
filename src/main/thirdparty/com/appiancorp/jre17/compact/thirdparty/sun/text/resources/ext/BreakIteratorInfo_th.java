@@ -42,11 +42,11 @@
  * will not be liable for any third party claims against you.
  */
 
-package sun.text.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources.ext;
 
-import java.util.ListResourceBundle;
+import com.appiancorp.jre17.compact.util.AppianListResourceBundle;
 
-public class BreakIteratorInfo_th extends ListResourceBundle {
+public class BreakIteratorInfo_th extends AppianListResourceBundle {
     protected final Object[][] getContents() {
         return new Object[][] {
             // BreakIteratorClasses lists the class names to instantiate for each

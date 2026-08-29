@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.security.AccessController;
 import java.security.AccessControlException;
@@ -53,9 +55,9 @@ import java.util.spi.CurrencyNameProvider;
 import java.util.spi.LocaleNameProvider;
 import java.util.spi.LocaleServiceProvider;
 import java.util.spi.TimeZoneNameProvider;
-import sun.text.spi.JavaTimeDateTimePatternProvider;
-import sun.util.resources.LocaleData;
-import sun.util.spi.CalendarProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.spi.JavaTimeDateTimePatternProvider;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.LocaleData;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.spi.CalendarProvider;
 
 /**
  * LocaleProviderAdapter implementation for the legacy JRE locale data.
@@ -476,7 +478,13 @@ public class JRELocaleProviderAdapter extends LocaleProviderAdapter implements R
             String nonBaseTags = AccessController.doPrivileged((PrivilegedExceptionAction<String>) () -> {
                 StringBuilder tags = new StringBuilder();
                 for (LocaleDataMetaInfo ldmi :
-                        ServiceLoader.loadInstalled(LocaleDataMetaInfo.class)) {
+                        // Modified by Appian Corp., 2026: loadInstalled(...)
+                        // only searches the platform class loader, which
+                        // never finds this classpath JAR's own
+                        // META-INF/services entries. ServiceLoader.load with
+                        // this class's own classloader does.
+                        ServiceLoader.load(LocaleDataMetaInfo.class,
+                                JRELocaleProviderAdapter.class.getClassLoader())) {
                     if (ldmi.getType() == LocaleProviderAdapter.Type.JRE) {
                         String t = ldmi.availableLanguageTags(category);
                         if (t != null) {

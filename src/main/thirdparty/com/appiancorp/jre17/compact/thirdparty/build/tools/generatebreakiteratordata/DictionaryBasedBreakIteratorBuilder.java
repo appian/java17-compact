@@ -23,7 +23,7 @@
  * questions.
  */
 
-package build.tools.generatebreakiteratordata;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.generatebreakiteratordata;
 
 import java.util.Hashtable;
 import java.util.Vector;

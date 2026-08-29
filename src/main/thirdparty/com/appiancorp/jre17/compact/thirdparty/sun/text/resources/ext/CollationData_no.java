@@ -41,11 +41,11 @@
  *
  */
 
-package sun.text.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources.ext;
 
-import java.util.ListResourceBundle;
+import com.appiancorp.jre17.compact.util.AppianListResourceBundle;
 
-public class CollationData_no extends ListResourceBundle {
+public class CollationData_no extends AppianListResourceBundle {
 
     protected final Object[][] getContents() {
         return new Object[][] {

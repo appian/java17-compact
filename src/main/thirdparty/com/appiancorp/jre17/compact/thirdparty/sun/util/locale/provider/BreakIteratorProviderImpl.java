@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.io.IOException;
 import java.text.BreakIterator;
@@ -32,8 +32,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.Set;
-import sun.text.DictionaryBasedBreakIterator;
-import sun.text.RuleBasedBreakIterator;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.DictionaryBasedBreakIterator;
+import com.appiancorp.jre17.compact.thirdparty.sun.text.RuleBasedBreakIterator;
 
 /**
  * Concrete implementation of the  {@link java.text.spi.BreakIteratorProvider

@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.security.util;
+package com.appiancorp.jre17.compact.thirdparty.sun.security.util;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
@@ -34,7 +34,7 @@ import java.util.HexFormat;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Locale;
-import sun.security.action.GetPropertyAction;
+import com.appiancorp.jre17.compact.thirdparty.sun.security.action.GetPropertyAction;
 
 /**
  * A utility class for debugging.

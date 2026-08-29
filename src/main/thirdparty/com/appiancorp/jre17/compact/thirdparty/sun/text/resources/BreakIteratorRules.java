@@ -42,9 +42,9 @@
  * will not be liable for any third party claims against you.
  */
 
-package sun.text.resources;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources;
 
-import java.util.ListResourceBundle;
+import com.appiancorp.jre17.compact.util.AppianListResourceBundle;
 
 /**
  * Default break-iterator rules.  These rules are more or less general for
@@ -64,7 +64,7 @@ import java.util.ListResourceBundle;
  * files which are used on runtime instead.
  */
 
-public class BreakIteratorRules extends ListResourceBundle {
+public class BreakIteratorRules extends AppianListResourceBundle {
     protected final Object[][] getContents() {
         return new Object[][] {
             // rules describing how to break between logical characters

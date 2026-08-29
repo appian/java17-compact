@@ -37,7 +37,7 @@
  * Taligent is a registered trademark of Taligent, Inc.
  */
 
-package build.tools.generatebreakiteratordata;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.generatebreakiteratordata;
 
 import java.util.Arrays;
 import java.util.Hashtable;

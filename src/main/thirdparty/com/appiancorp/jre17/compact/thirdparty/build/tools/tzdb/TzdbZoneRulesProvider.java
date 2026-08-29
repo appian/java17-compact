@@ -24,7 +24,7 @@
  */
 
 
-package build.tools.tzdb;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.tzdb;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +38,7 @@ import java.time.*;
 import java.time.Year;
 import java.time.chrono.IsoChronology;
 import java.time.temporal.TemporalAdjusters;
-import build.tools.tzdb.ZoneOffsetTransitionRule.TimeDefinition;
+import com.appiancorp.jre17.compact.thirdparty.build.tools.tzdb.ZoneOffsetTransitionRule.TimeDefinition;
 import java.time.zone.ZoneRulesException;
 
 /**

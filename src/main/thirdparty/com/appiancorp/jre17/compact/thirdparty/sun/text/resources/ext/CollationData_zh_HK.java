@@ -41,15 +41,15 @@
  *
  */
 
-package sun.text.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.text.resources.ext;
 
-import java.util.ListResourceBundle;
+import com.appiancorp.jre17.compact.util.AppianListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import sun.util.locale.provider.LocaleProviderAdapter;
-import sun.util.locale.provider.ResourceBundleBasedAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.ResourceBundleBasedAdapter;
 
-public class CollationData_zh_HK extends ListResourceBundle {
+public class CollationData_zh_HK extends AppianListResourceBundle {
 
     // reparent to zh_TW for traditional Chinese collation sequence
     public CollationData_zh_HK() {

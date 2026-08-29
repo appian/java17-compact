@@ -23,7 +23,7 @@
  * questions.
  */
 
-package sun.util.spi;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.spi;
 
 import java.util.Calendar;
 import java.util.Locale;

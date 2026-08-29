@@ -38,7 +38,7 @@
  *
  */
 
-package sun.util.locale.provider;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -55,11 +55,11 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import sun.security.action.GetPropertyAction;
-import sun.util.resources.LocaleData;
-import sun.util.resources.OpenListResourceBundle;
-import sun.util.resources.ParallelListResourceBundle;
-import sun.util.resources.TimeZoneNamesBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.security.action.GetPropertyAction;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.LocaleData;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.OpenListResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ParallelListResourceBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.TimeZoneNamesBundle;
 
 /**
  * Central accessor to locale-dependent resources for JRE/CLDR provider adapters.

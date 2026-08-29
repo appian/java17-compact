@@ -59,7 +59,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package java.time.zone;
+package com.appiancorp.jre17.compact.thirdparty.build.tools.tzdb;
 
 import java.io.DataInput;
 import java.io.DataOutput;

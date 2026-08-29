@@ -38,9 +38,9 @@
  *
  */
 
-package sun.util.resources.ext;
+package com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ext;
 
-import sun.util.resources.TimeZoneNamesBundle;
+import com.appiancorp.jre17.compact.thirdparty.sun.util.resources.TimeZoneNamesBundle;
 
 public final class TimeZoneNames_en_IE extends TimeZoneNamesBundle {
 
