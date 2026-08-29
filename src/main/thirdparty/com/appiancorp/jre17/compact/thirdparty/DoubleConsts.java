@@ -21,9 +21,11 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026
  */
 
-package jdk.internal.math;
+package com.appiancorp.jre17.compact.thirdparty;
 
 /**
  * This class contains additional constants documenting limits of the

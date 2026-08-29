@@ -21,10 +21,10 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ *
+ * Modified by Appian Corp., 2026
  */
-package jdk.internal.math;
-
-import jdk.internal.misc.CDS;
+package com.appiancorp.jre17.compact.thirdparty;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -79,81 +79,73 @@ public /*@ spec_bigint_math @*/ class FDBigInteger {
     // Zero as an FDBigInteger.
     public static final FDBigInteger ZERO;
 
-    // Archive proxy
-    private static Object[] archivedCaches;
-
     // Initialize FDBigInteger cache of powers of 5.
     static {
-        CDS.initializeFromArchive(FDBigInteger.class);
-        Object[] caches = archivedCaches;
-        if (caches == null) {
-            long[] long5pow = {
-                    1L,
-                    5L,
-                    5L * 5,
-                    5L * 5 * 5,
-                    5L * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                };
-            int[] small5pow = {
-                    1,
-                    5,
-                    5 * 5,
-                    5 * 5 * 5,
-                    5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
-                    5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5
-                };
-            FDBigInteger[] pow5cache = new FDBigInteger[MAX_FIVE_POW];
-            int i = 0;
-            while (i < small5pow.length) {
-                FDBigInteger pow5 = new FDBigInteger(new int[] { small5pow[i] }, 0);
-                pow5.makeImmutable();
-                pow5cache[i] = pow5;
-                i++;
-            }
-            FDBigInteger prev = pow5cache[i - 1];
-            while (i < MAX_FIVE_POW) {
-                pow5cache[i] = prev = prev.mult(5);
-                prev.makeImmutable();
-                i++;
-            }
-            FDBigInteger zero = new FDBigInteger(new int[0], 0);
-            zero.makeImmutable();
-            archivedCaches = caches = new Object[] {small5pow, long5pow, pow5cache, zero};
+        long[] long5pow = {
+                1L,
+                5L,
+                5L * 5,
+                5L * 5 * 5,
+                5L * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5L * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+            };
+        int[] small5pow = {
+                1,
+                5,
+                5 * 5,
+                5 * 5 * 5,
+                5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5,
+                5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5 * 5
+            };
+        FDBigInteger[] pow5cache = new FDBigInteger[MAX_FIVE_POW];
+        int i = 0;
+        while (i < small5pow.length) {
+            FDBigInteger pow5 = new FDBigInteger(new int[] { small5pow[i] }, 0);
+            pow5.makeImmutable();
+            pow5cache[i] = pow5;
+            i++;
         }
-        SMALL_5_POW = (int[])caches[0];
-        LONG_5_POW = (long[])caches[1];
-        POW_5_CACHE = (FDBigInteger[])caches[2];
-        ZERO = (FDBigInteger)caches[3];
+        FDBigInteger prev = pow5cache[i - 1];
+        while (i < MAX_FIVE_POW) {
+            pow5cache[i] = prev = prev.mult(5);
+            prev.makeImmutable();
+            i++;
+        }
+        FDBigInteger zero = new FDBigInteger(new int[0], 0);
+        zero.makeImmutable();
+        SMALL_5_POW = small5pow;
+        LONG_5_POW = long5pow;
+        POW_5_CACHE = pow5cache;
+        ZERO = zero;
     }
 
     // Constant for casting an int to a long via bitwise AND.
