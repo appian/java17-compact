@@ -13,9 +13,12 @@ import java.util.spi.CalendarNameProvider;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactCalendarNameProviderTest {
 
     private final CalendarNameProvider provider = new Java17CompactCalendarNameProvider();
+    private final CalendarNameProvider jreProvider = LocaleProviderAdapter.forJRE().getCalendarNameProvider();
 
     @Test
     void getAvailableLocalesIsNonEmptyAndIncludesUs() {
@@ -68,5 +71,38 @@ class Java17CompactCalendarNameProviderTest {
     void nullArgumentsThrowNullPointerException() {
         assertThrows(NullPointerException.class,
             () -> provider.getDisplayName("gregory", Calendar.MONTH, Calendar.JANUARY, Calendar.LONG, null));
+    }
+
+    @Test
+    void everyAdvertisedLocaleMatchesJreForNamesAndMaps() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        int[] fields = { Calendar.ERA, Calendar.MONTH, Calendar.DAY_OF_WEEK, Calendar.AM_PM };
+        int[][] values = {
+            { Calendar.ERA },
+            { Calendar.JANUARY, Calendar.JUNE, Calendar.DECEMBER },
+            { Calendar.SUNDAY, Calendar.WEDNESDAY, Calendar.SATURDAY },
+            { Calendar.AM, Calendar.PM }
+        };
+        int[] styles = { Calendar.LONG, Calendar.SHORT };
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            for (int fieldIndex = 0; fieldIndex < fields.length; fieldIndex++) {
+                int field = fields[fieldIndex];
+                for (int value : values[fieldIndex]) {
+                    for (int style : styles) {
+                        String expected = jreProvider.getDisplayName("gregory", field, value, style, locale);
+                        String actual = provider.getDisplayName("gregory", field, value, style, locale);
+                        assertEquals(expected, actual,
+                            "display name mismatch for " + locale + ", field=" + field
+                                + ", value=" + value + ", style=" + style);
+                    }
+                }
+                for (int style : styles) {
+                    assertEquals(jreProvider.getDisplayNames("gregory", field, style, locale),
+                        provider.getDisplayNames("gregory", field, style, locale),
+                        "display-name map mismatch for " + locale + ", field=" + field
+                            + ", style=" + style);
+                }
+            }
+        }
     }
 }

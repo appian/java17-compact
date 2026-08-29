@@ -58,4 +58,17 @@ class Java17CompactCalendarDataProviderTest {
         assertThrows(NullPointerException.class, () -> provider.getFirstDayOfWeek(null));
         assertThrows(NullPointerException.class, () -> provider.getMinimalDaysInFirstWeek(null));
     }
+
+    @Test
+    void everyAdvertisedLocaleHasTheSameKnownSparseDataBehavior() {
+        // CalendarData is the one category with no copied bundle, so exercise
+        // both methods for every metadata-advertised locale. This prevents a
+        // newly added locale from silently getting different failure behavior.
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getFirstDayOfWeek(locale), "first day for " + locale);
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getMinimalDaysInFirstWeek(locale), "minimal days for " + locale);
+        }
+    }
 }

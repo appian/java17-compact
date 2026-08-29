@@ -12,9 +12,12 @@ import java.util.spi.TimeZoneNameProvider;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactTimeZoneNameProviderTest {
 
     private final TimeZoneNameProvider provider = new Java17CompactTimeZoneNameProvider();
+    private final TimeZoneNameProvider jreProvider = LocaleProviderAdapter.forJRE().getTimeZoneNameProvider();
 
     // TimeZoneNames' base bundle covers plain "en" only (not "en-US") -- see
     // BaseLocaleDataMetaInfo's "TimeZoneNames" entry -- while the ext bundles add
@@ -59,5 +62,25 @@ class Java17CompactTimeZoneNameProviderTest {
         assertThrows(NullPointerException.class, () -> provider.getDisplayName(null, false, TimeZone.LONG, Locale.UK));
         assertThrows(NullPointerException.class,
             () -> provider.getDisplayName("America/New_York", false, TimeZone.LONG, null));
+    }
+
+    @Test
+    void everyAdvertisedLocaleIdDaylightFlagAndStyleMatchesJre() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        String[] ids = { "America/New_York", "Europe/London", "Asia/Tokyo", "UTC", "GMT" };
+        int[] styles = { TimeZone.SHORT, TimeZone.LONG };
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            for (String id : ids) {
+                for (boolean daylight : new boolean[] { false, true }) {
+                    for (int style : styles) {
+                        String actual = provider.getDisplayName(id, daylight, style, locale);
+                        String expected = jreProvider.getDisplayName(id, daylight, style, locale);
+                        assertEquals(expected, actual,
+                            "time-zone name mismatch for " + locale + ", id=" + id
+                                + ", daylight=" + daylight + ", style=" + style);
+                    }
+                }
+            }
+        }
     }
 }

@@ -11,9 +11,12 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactDateFormatSymbolsProviderTest {
 
     private final DateFormatSymbolsProvider provider = new Java17CompactDateFormatSymbolsProvider();
+    private final DateFormatSymbolsProvider jreProvider = LocaleProviderAdapter.forJRE().getDateFormatSymbolsProvider();
 
     @Test
     void getAvailableLocalesIsNonEmptyAndIncludesUs() {
@@ -46,7 +49,7 @@ class Java17CompactDateFormatSymbolsProviderTest {
     void matchesRealJdkInstanceForMultipleLocales() {
         Locale[] samples = { Locale.US, Locale.FRANCE, Locale.GERMANY, Locale.JAPAN };
         for (Locale locale : samples) {
-            DateFormatSymbols expected = DateFormatSymbols.getInstance(locale);
+            DateFormatSymbols expected = jreProvider.getInstance(locale);
             DateFormatSymbols actual = provider.getInstance(locale);
             assertEquals(Arrays.asList(expected.getMonths()), Arrays.asList(actual.getMonths()),
                 "month names mismatch for " + locale);
@@ -68,5 +71,28 @@ class Java17CompactDateFormatSymbolsProviderTest {
         assertEquals(first, second);
         first.setAmPmStrings(new String[] { "MUTATED", "MUTATED" });
         assertEquals("AM", second.getAmPmStrings()[0]);
+    }
+
+    @Test
+    void everyAdvertisedLocaleMatchesAllJreDateFormatSymbols() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            DateFormatSymbols actual = provider.getInstance(locale);
+            DateFormatSymbols expected = jreProvider.getInstance(locale);
+            assertEquals(Arrays.asList(expected.getEras()), Arrays.asList(actual.getEras()), "eras for " + locale);
+            assertEquals(Arrays.asList(expected.getMonths()), Arrays.asList(actual.getMonths()), "months for " + locale);
+            assertEquals(Arrays.asList(expected.getShortMonths()), Arrays.asList(actual.getShortMonths()),
+                "short months for " + locale);
+            assertEquals(Arrays.asList(expected.getWeekdays()), Arrays.asList(actual.getWeekdays()),
+                "weekdays for " + locale);
+            assertEquals(Arrays.asList(expected.getShortWeekdays()), Arrays.asList(actual.getShortWeekdays()),
+                "short weekdays for " + locale);
+            assertEquals(Arrays.asList(expected.getAmPmStrings()), Arrays.asList(actual.getAmPmStrings()),
+                "AM/PM for " + locale);
+            assertEquals(Arrays.deepToString(expected.getZoneStrings()), Arrays.deepToString(actual.getZoneStrings()),
+                "zone strings for " + locale);
+            assertEquals(expected.getLocalPatternChars(), actual.getLocalPatternChars(),
+                "pattern chars for " + locale);
+        }
     }
 }

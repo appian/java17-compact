@@ -11,9 +11,12 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactBreakIteratorProviderTest {
 
     private final BreakIteratorProvider provider = new Java17CompactBreakIteratorProvider();
+    private final BreakIteratorProvider jreProvider = LocaleProviderAdapter.forJRE().getBreakIteratorProvider();
 
     @Test
     void getAvailableLocalesIsNonEmptyAndIncludesUs() {
@@ -81,5 +84,31 @@ class Java17CompactBreakIteratorProviderTest {
         assertThrows(NullPointerException.class, () -> provider.getLineInstance(null));
         assertThrows(NullPointerException.class, () -> provider.getCharacterInstance(null));
         assertThrows(NullPointerException.class, () -> provider.getSentenceInstance(null));
+    }
+
+    @Test
+    void everyAdvertisedLocaleMatchesJreForEveryIteratorKind() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            JreLocaleProviderTestSupport.assertBreakIteratorMatches("sentence", locale,
+                () -> provider.getSentenceInstance(locale), () -> jreProvider.getSentenceInstance(locale));
+            JreLocaleProviderTestSupport.assertBreakIteratorMatches("character", locale,
+                () -> provider.getCharacterInstance(locale), () -> jreProvider.getCharacterInstance(locale));
+
+            // The port intentionally lacks OpenJDK's thai_dict resource. The JRE
+            // word/line iterators therefore fail at construction for Thai, while
+            // the rule-based character/sentence iterators above remain comparable.
+            if (!locale.getLanguage().equals("th")) {
+                JreLocaleProviderTestSupport.assertBreakIteratorMatches("word", locale,
+                    () -> provider.getWordInstance(locale), () -> jreProvider.getWordInstance(locale));
+                JreLocaleProviderTestSupport.assertBreakIteratorMatches("line", locale,
+                    () -> provider.getLineInstance(locale), () -> jreProvider.getLineInstance(locale));
+            } else {
+                    assertThrows(java.lang.InternalError.class,
+                        () -> provider.getWordInstance(locale));
+                assertThrows(java.lang.InternalError.class,
+                    () -> provider.getLineInstance(locale));
+            }
+        }
     }
 }

@@ -11,9 +11,12 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactDecimalFormatSymbolsProviderTest {
 
     private final DecimalFormatSymbolsProvider provider = new Java17CompactDecimalFormatSymbolsProvider();
+    private final DecimalFormatSymbolsProvider jreProvider = LocaleProviderAdapter.forJRE().getDecimalFormatSymbolsProvider();
 
     @Test
     void getAvailableLocalesIsNonEmptyAndIncludesUs() {
@@ -39,7 +42,7 @@ class Java17CompactDecimalFormatSymbolsProviderTest {
     void matchesRealJdkInstanceForMultipleLocales() {
         Locale[] samples = { Locale.US, Locale.FRANCE, Locale.GERMANY, Locale.JAPAN };
         for (Locale locale : samples) {
-            DecimalFormatSymbols expected = DecimalFormatSymbols.getInstance(locale);
+            DecimalFormatSymbols expected = jreProvider.getInstance(locale);
             DecimalFormatSymbols actual = provider.getInstance(locale);
             assertEquals(expected.getDecimalSeparator(), actual.getDecimalSeparator(), "decimal sep mismatch for " + locale);
             assertEquals(expected.getGroupingSeparator(), actual.getGroupingSeparator(), "grouping sep mismatch for " + locale);
@@ -58,5 +61,31 @@ class Java17CompactDecimalFormatSymbolsProviderTest {
         first.setDecimalSeparator('X');
         DecimalFormatSymbols second = provider.getInstance(Locale.US);
         assertEquals('.', second.getDecimalSeparator());
+    }
+
+    @Test
+    void everyAdvertisedLocaleMatchesAllJreDecimalSymbols() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            DecimalFormatSymbols actual = provider.getInstance(locale);
+            DecimalFormatSymbols expected = jreProvider.getInstance(locale);
+            assertEquals(expected.getCurrency(), actual.getCurrency(), "currency for " + locale);
+            assertEquals(expected.getCurrencySymbol(), actual.getCurrencySymbol(), "currency symbol for " + locale);
+            assertEquals(expected.getInternationalCurrencySymbol(), actual.getInternationalCurrencySymbol(),
+                "international currency for " + locale);
+            assertEquals(expected.getDecimalSeparator(), actual.getDecimalSeparator(), "decimal for " + locale);
+            assertEquals(expected.getGroupingSeparator(), actual.getGroupingSeparator(), "grouping for " + locale);
+            assertEquals(expected.getMonetaryDecimalSeparator(), actual.getMonetaryDecimalSeparator(),
+                "monetary decimal for " + locale);
+            assertEquals(expected.getPercent(), actual.getPercent(), "percent for " + locale);
+            assertEquals(expected.getPerMill(), actual.getPerMill(), "per mille for " + locale);
+            assertEquals(expected.getZeroDigit(), actual.getZeroDigit(), "zero digit for " + locale);
+            assertEquals(expected.getDigit(), actual.getDigit(), "digit for " + locale);
+            assertEquals(expected.getPatternSeparator(), actual.getPatternSeparator(), "pattern separator for " + locale);
+            assertEquals(expected.getMinusSign(), actual.getMinusSign(), "minus sign for " + locale);
+            assertEquals(expected.getInfinity(), actual.getInfinity(), "infinity for " + locale);
+            assertEquals(expected.getNaN(), actual.getNaN(), "NaN for " + locale);
+            assertEquals(expected.getExponentSeparator(), actual.getExponentSeparator(), "exponent for " + locale);
+        }
     }
 }

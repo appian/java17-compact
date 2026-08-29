@@ -64,13 +64,20 @@ class Java17CompactLocaleNameProviderTest {
     }
 
     @Test
-    void nullVariantDoesNotThrowNullPointerException() {
-        // getDisplayVariant builds its lookup key as "%%" + variant via plain string
-        // concatenation rather than validating the argument first, so a null variant
-        // silently becomes the literal key "%%null" instead of raising an NPE; it
-        // still ends up failing with MissingResourceException here only because
-        // zh-HK's own parent chain is incomplete (see the test above), not because
-        // of the null argument itself.
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getDisplayVariant(null, HONG_KONG));
+    void everyAdvertisedLocaleHasTheKnownSparseDataBehaviorForAllMethods() {
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getDisplayLanguage("fr", locale), "language for " + locale);
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getDisplayCountry("FR", locale), "country for " + locale);
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getDisplayVariant("VARIANT", locale), "variant for " + locale);
+        }
+    }
+
+    @Test
+    void nullVariantRetainsTheJreProviderLookupBehavior() {
+        assertThrows(java.util.MissingResourceException.class,
+            () -> provider.getDisplayVariant(null, HONG_KONG));
     }
 }

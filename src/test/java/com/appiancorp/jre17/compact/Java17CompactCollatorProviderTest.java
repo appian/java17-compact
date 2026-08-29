@@ -11,9 +11,12 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactCollatorProviderTest {
 
     private final CollatorProvider provider = new Java17CompactCollatorProvider();
+    private final CollatorProvider jreProvider = LocaleProviderAdapter.forJRE().getCollatorProvider();
 
     @Test
     void getAvailableLocalesIsNonEmpty() {
@@ -67,5 +70,37 @@ class Java17CompactCollatorProviderTest {
     @Test
     void nullLocaleThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> provider.getInstance(null));
+    }
+
+    @Test
+    void everyAdvertisedLocaleMatchesJreAcrossStrengthsAndCollationKeys() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        String[] corpus = { "a", "A", "ae", "ä", "b", "ch", "z", "中", "あ", "😀" };
+        int[] strengths = { Collator.PRIMARY, Collator.SECONDARY, Collator.TERTIARY, Collator.IDENTICAL };
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            for (int strength : strengths) {
+                Collator actual = provider.getInstance(locale);
+                Collator expected = jreProvider.getInstance(locale);
+                actual.setStrength(strength);
+                expected.setStrength(strength);
+                assertEquals(expected.getStrength(), actual.getStrength(), "strength for " + locale);
+                assertEquals(expected.getDecomposition(), actual.getDecomposition(),
+                    "decomposition for " + locale);
+                for (String left : corpus) {
+                    for (String right : corpus) {
+                        assertEquals(Integer.signum(expected.compare(left, right)),
+                            Integer.signum(actual.compare(left, right)),
+                            "comparison mismatch for " + locale + ", strength=" + strength
+                                + ", left=" + left + ", right=" + right);
+                    }
+                }
+                for (String value : corpus) {
+                    assertEquals(Arrays.toString(expected.getCollationKey(value).toByteArray()),
+                        Arrays.toString(actual.getCollationKey(value).toByteArray()),
+                        "collation key mismatch for " + locale + ", strength=" + strength
+                            + ", value=" + value);
+                }
+            }
+        }
     }
 }

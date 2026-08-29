@@ -64,4 +64,19 @@ class Java17CompactCurrencyNameProviderTest {
         assertThrows(NullPointerException.class, () -> provider.getSymbol(null, HONG_KONG));
         assertThrows(NullPointerException.class, () -> provider.getSymbol("USD", null));
     }
+
+    @Test
+    void everyAdvertisedLocaleAndBothMethodsHaveTheKnownSparseDataBehavior() {
+        // The available-locale metadata is broader than the copied resource
+        // graph. Exercise common, unknown, and display-name lookups everywhere
+        // rather than only testing zh-HK's two directly-defined entries.
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getSymbol("USD", locale), "symbol for " + locale);
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getDisplayName("USD", locale), "display name for " + locale);
+            assertThrows(java.util.MissingResourceException.class,
+                () -> provider.getSymbol("ZZZ", locale), "unknown symbol for " + locale);
+        }
+    }
 }

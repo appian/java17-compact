@@ -14,9 +14,12 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 class Java17CompactDateFormatProviderTest {
 
     private final DateFormatProvider provider = new Java17CompactDateFormatProvider();
+    private final DateFormatProvider jreProvider = LocaleProviderAdapter.forJRE().getDateFormatProvider();
 
     @Test
     void getAvailableLocalesIsNonEmptyAndIncludesUs() {
@@ -85,6 +88,37 @@ class Java17CompactDateFormatProviderTest {
         for (int style : styles) {
             assertNotNull(provider.getDateInstance(style, Locale.US));
             assertNotNull(provider.getTimeInstance(style, Locale.US));
+        }
+    }
+
+    @Test
+    void everyAdvertisedLocaleAndStyleMatchesJre() {
+        JreLocaleProviderTestSupport.useRepackagedJreProvider();
+        Date fixed = new Date(1710491696000L);
+        int[] styles = { DateFormat.FULL, DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT };
+        for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
+            for (int style : styles) {
+                DateFormat actualDate = provider.getDateInstance(style, locale);
+                DateFormat expectedDate = jreProvider.getDateInstance(style, locale);
+                DateFormat actualTime = provider.getTimeInstance(style, locale);
+                DateFormat expectedTime = jreProvider.getTimeInstance(style, locale);
+                DateFormat actualDateTime = provider.getDateTimeInstance(style, style, locale);
+                DateFormat expectedDateTime = jreProvider.getDateTimeInstance(style, style, locale);
+                actualDate.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                expectedDate.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                actualTime.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                expectedTime.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                actualDateTime.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                expectedDateTime.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                assertEquals(expectedDate.format(fixed), actualDate.format(fixed),
+                    "date mismatch for " + locale + ", style=" + style);
+                assertEquals(expectedTime.format(fixed), actualTime.format(fixed),
+                    "time mismatch for " + locale + ", style=" + style);
+                assertEquals(expectedDateTime.format(fixed), actualDateTime.format(fixed),
+                    "date-time mismatch for " + locale + ", style=" + style);
+                assertEquals(expectedDate.isLenient(), actualDate.isLenient(), "date leniency for " + locale);
+                assertEquals(expectedTime.isLenient(), actualTime.isLenient(), "time leniency for " + locale);
+            }
         }
     }
 }
