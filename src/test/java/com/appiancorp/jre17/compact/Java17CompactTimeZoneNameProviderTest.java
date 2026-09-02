@@ -57,6 +57,36 @@ class Java17CompactTimeZoneNameProviderTest {
         assertEquals(null, name);
     }
 
+    // Regression: the provider must advertise and support country/region variants
+    // of the languages it serves (e.g. en_US), not just the language-level locale
+    // (en). Otherwise, when used as an SPI drop-in with java.locale.providers=
+    // SPI,CLDR, the JDK's SPILocaleProviderAdapter delegate skips this provider at
+    // the en_US candidate (its isSupportedLocale is a direct map lookup with no
+    // language fallback) and CLDR shadows it with a GMT-offset short name, breaking
+    // JDK 17 COMPAT zone-name parity (e.g. Pacific/Kiritimati -> GMT+14:00 instead
+    // of LINT). See Java17CompactTimeZoneNameProvider#getAvailableLocales.
+    @Test
+    void advertisesCountryVariantsOfSupportedLanguages() {
+        assertTrue(Arrays.asList(provider.getAvailableLocales()).contains(Locale.US),
+            "getAvailableLocales() must include en_US so the SPI delegate registers it");
+    }
+
+    @Test
+    void supportsCountryVariantOfSupportedLanguage() {
+        assertTrue(provider.isSupportedLocale(Locale.US));
+        assertTrue(provider.isSupportedLocale(Locale.ENGLISH));
+    }
+
+    @Test
+    void countryLocaleResolvesToJdk17AbbreviationLikeLanguage() {
+        // These abbreviations come from the JDK 17 JRE/COMPAT data and must be
+        // returned for the country locale exactly as for the language locale.
+        assertEquals("LINT", provider.getDisplayName("Pacific/Kiritimati", false, TimeZone.SHORT, Locale.US));
+        assertEquals("IRST", provider.getDisplayName("Asia/Tehran", false, TimeZone.SHORT, Locale.US));
+        assertEquals(provider.getDisplayName("Pacific/Kiritimati", false, TimeZone.SHORT, Locale.ENGLISH),
+            provider.getDisplayName("Pacific/Kiritimati", false, TimeZone.SHORT, Locale.US));
+    }
+
     @Test
     void nullArgumentsThrowNullPointerException() {
         assertThrows(NullPointerException.class, () -> provider.getDisplayName(null, false, TimeZone.LONG, Locale.UK));

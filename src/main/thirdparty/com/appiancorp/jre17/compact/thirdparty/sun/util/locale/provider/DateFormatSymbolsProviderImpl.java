@@ -29,6 +29,8 @@ import java.text.DateFormatSymbols;
 import java.text.spi.DateFormatSymbolsProvider;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Concrete implementation of the  {@link java.text.spi.DateFormatSymbolsProvider
@@ -40,6 +42,15 @@ import java.util.Set;
 public class DateFormatSymbolsProviderImpl extends DateFormatSymbolsProvider implements AvailableLanguageTags {
     private final LocaleProviderAdapter.Type type;
     private final Set<String> langtags;
+
+    // Zone strings are normally resolved lazily by java.text.DateFormatSymbols.getZoneStrings()
+    // through sun.util.locale.provider.TimeZoneNameUtility. When this ported stack runs as an
+    // SPI drop-in on a newer JDK, that lazy path resolves against the *host* runtime's CLDR data
+    // instead of the ported JDK 17 JRE/COMPAT TimeZoneNames, dropping legacy zone abbreviations
+    // such as LINT and IRDT (so SimpleDateFormat could no longer parse them). We therefore
+    // populate zoneStrings eagerly from the ported JRE resources below. Cache per locale since
+    // getZoneStrings() rebuilds the ~600-row array on every call.
+    private final ConcurrentMap<Locale, String[][]> zoneStringsCache = new ConcurrentHashMap<>();
 
     public DateFormatSymbolsProviderImpl(LocaleProviderAdapter.Type type, Set<String> langtags) {
         this.type = type;
@@ -82,7 +93,10 @@ public class DateFormatSymbolsProviderImpl extends DateFormatSymbolsProvider imp
             throw new NullPointerException();
         }
 
-        return new DateFormatSymbols(locale);
+        DateFormatSymbols dfs = new DateFormatSymbols(locale);
+        dfs.setZoneStrings(zoneStringsCache.computeIfAbsent(locale,
+                loc -> LocaleProviderAdapter.forType(type).getLocaleResources(loc).getZoneStrings()));
+        return dfs;
     }
 
     @Override

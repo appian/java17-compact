@@ -1,5 +1,8 @@
 package com.appiancorp.jre17.compact;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,15 +12,16 @@ import java.util.spi.LocaleNameProvider;
 
 import org.junit.jupiter.api.Test;
 
+// The full set of JDK 17 JRE/COMPAT LocaleNames resource bundles is now ported
+// (CurrencyNames/LocaleNames/CalendarData .properties compiled to
+// ListResourceBundle subclasses, plus the en/en-US/root base bundles), so
+// locale/country/language names resolve through the complete parent chain,
+// matching java.locale.providers=COMPAT on JDK 17. Expected values below were
+// captured from JDK 17 running with -Djava.locale.providers=COMPAT.
 class Java17CompactLocaleNameProviderTest {
 
     private final LocaleNameProvider provider = new Java17CompactLocaleNameProvider();
 
-    // LocaleNames is only ported for zh-HK in this repository (see
-    // LocaleNames_zh_HK.java) -- no "en"/"en-US" or "fr" bundle exists. zh-HK's
-    // own bundle defines no entries directly (getContents() returns {}) and
-    // reparents to zh-TW, but no zh-TW LocaleNames bundle has been ported
-    // either, so no locale/country/language name is actually resolvable today.
     private static final Locale HONG_KONG = Locale.forLanguageTag("zh-HK");
 
     @Test
@@ -28,31 +32,29 @@ class Java17CompactLocaleNameProviderTest {
     }
 
     @Test
-    void displayCountryInHongKongLocaleThrowsBecauseParentChainIsIncomplete() {
-        // zh-HK's bundle defines no entries directly and its zh-TW parent bundle
-        // has not been ported, so resolution fails today even though zh-HK is
-        // listed as an "available" locale for this category.
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getDisplayCountry("FR", HONG_KONG));
+    void displayCountryInHongKongLocaleResolvesThroughParentChain() {
+        // zh-HK reparents to zh-TW; the country name resolves to the Traditional
+        // Chinese form, matching JDK 17 COMPAT.
+        assertEquals("\u6cd5\u570b", provider.getDisplayCountry("FR", HONG_KONG));
     }
 
     @Test
-    void displayLanguageInHongKongLocaleThrowsBecauseParentChainIsIncomplete() {
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getDisplayLanguage("fr", HONG_KONG));
+    void displayLanguageInHongKongLocaleResolvesThroughParentChain() {
+        assertEquals("\u6cd5\u6587", provider.getDisplayLanguage("fr", HONG_KONG));
     }
 
     @Test
-    void displayVariantInHongKongLocaleThrowsBecauseParentChainIsIncomplete() {
-        assertThrows(java.util.MissingResourceException.class,
-            () -> provider.getDisplayVariant("SOME_VARIANT", HONG_KONG));
+    void displayVariantWithUnknownKeyReturnsNull() {
+        // JRE/COMPAT has no variant display names; an unknown variant key
+        // resolves to null (it does not throw).
+        assertNull(provider.getDisplayVariant("SOME_VARIANT", HONG_KONG));
     }
 
     @Test
-    void localeWithNoLocaleNamesThrowsMissingResourceException() {
-        // US has no ported LocaleNames bundle and no root/base fallback either
-        // (BaseLocaleDataMetaInfo's "LocaleNames" entry is empty), so this
-        // currently throws rather than falling back to a built-in default --
-        // this pins today's actual (incompletely-ported) behavior.
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getDisplayLanguage("fr", Locale.US));
+    void displayNamesInUsLocaleResolveToEnglish() {
+        // en/en-US base bundles are now present, so English names resolve.
+        assertEquals("French", provider.getDisplayLanguage("fr", Locale.US));
+        assertEquals("France", provider.getDisplayCountry("FR", Locale.US));
     }
 
     @Test
@@ -64,20 +66,20 @@ class Java17CompactLocaleNameProviderTest {
     }
 
     @Test
-    void everyAdvertisedLocaleHasTheKnownSparseDataBehaviorForAllMethods() {
+    void everyAdvertisedLocaleResolvesLanguageAndCountryNames() {
+        // With the complete bundle set, every advertised locale resolves a
+        // (non-null) language and country name via its parent chain, while an
+        // unknown variant key uniformly resolves to null.
         for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
-            assertThrows(java.util.MissingResourceException.class,
-                () -> provider.getDisplayLanguage("fr", locale), "language for " + locale);
-            assertThrows(java.util.MissingResourceException.class,
-                () -> provider.getDisplayCountry("FR", locale), "country for " + locale);
-            assertThrows(java.util.MissingResourceException.class,
-                () -> provider.getDisplayVariant("VARIANT", locale), "variant for " + locale);
+            assertNotNull(provider.getDisplayLanguage("fr", locale), "language for " + locale);
+            assertNotNull(provider.getDisplayCountry("FR", locale), "country for " + locale);
+            assertNull(provider.getDisplayVariant("VARIANT", locale), "variant for " + locale);
         }
     }
 
     @Test
-    void nullVariantRetainsTheJreProviderLookupBehavior() {
-        assertThrows(java.util.MissingResourceException.class,
-            () -> provider.getDisplayVariant(null, HONG_KONG));
+    void nullVariantReturnsNull() {
+        // A null variant key resolves to null, matching the JRE provider.
+        assertNull(provider.getDisplayVariant(null, HONG_KONG));
     }
 }

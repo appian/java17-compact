@@ -1,74 +1,67 @@
 package com.appiancorp.jre17.compact;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.spi.CalendarDataProvider;
 
 import org.junit.jupiter.api.Test;
 
+// The full set of JDK 17 JRE/COMPAT CalendarData resource bundles is now ported
+// (CalendarData*.properties compiled to ListResourceBundle subclasses, plus the
+// root/en base bundles), so firstDayOfWeek / minimalDaysInFirstWeek resolve for
+// every advertised locale through the parent chain, matching
+// java.locale.providers=COMPAT on JDK 17. Expected values were captured from
+// JDK 17 running with -Djava.locale.providers=COMPAT.
 class Java17CompactCalendarDataProviderTest {
 
     private final CalendarDataProvider provider = new Java17CompactCalendarDataProvider();
 
-    // No CalendarData_*.java resource bundle has been ported into this
-    // repository at all (unlike FormatData/CollationData/TimeZoneNames, which
-    // have at least a base bundle). The "nb nb-NO nn-NO" entry produced by
-    // generateLocaleDataMetaInfo's implicit-locale injection in build.gradle.kts
-    // is metadata-only and does not correspond to any actual bundle class, so
-    // every real lookup below throws MissingResourceException today.
     @Test
-    void getAvailableLocalesReflectsMetadataEvenThoughNoBundlesExist() {
-        // getAvailableLocales() is driven purely by the langtag metadata
-        // (BaseLocaleDataMetaInfo/NonBaseLocaleDataMetaInfo), not by checking
-        // whether a bundle class actually exists, so it is non-empty despite
-        // no CalendarData bundle having been ported.
+    void getAvailableLocalesIsNonEmpty() {
         Locale[] locales = provider.getAvailableLocales();
         assertTrue(locales.length > 0);
     }
 
     @Test
-    void norwegianFirstDayOfWeekThrowsBecauseNoBundleIsPorted() {
-        assertThrows(java.util.MissingResourceException.class,
-            () -> provider.getFirstDayOfWeek(Locale.forLanguageTag("nb-NO")));
+    void norwegianFirstDayOfWeekIsMonday() {
+        assertEquals(Calendar.MONDAY, provider.getFirstDayOfWeek(Locale.forLanguageTag("nb-NO")));
     }
 
     @Test
-    void usFirstDayOfWeekThrowsBecauseNoBundleIsPorted() {
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getFirstDayOfWeek(Locale.US));
+    void usFirstDayOfWeekIsSunday() {
+        assertEquals(Calendar.SUNDAY, provider.getFirstDayOfWeek(Locale.US));
     }
 
     @Test
-    void rootLocaleAlsoThrowsBecauseNoBundleIsPorted() {
-        // Even Locale.ROOT, which real CalendarData bundles fall back to,
-        // throws here since no root bundle has been ported either.
-        assertThrows(java.util.MissingResourceException.class, () -> provider.getFirstDayOfWeek(Locale.ROOT));
+    void rootLocaleFirstDayOfWeekIsSunday() {
+        // Locale.ROOT falls back to the base CalendarData bundle.
+        assertEquals(Calendar.SUNDAY, provider.getFirstDayOfWeek(Locale.ROOT));
     }
 
     @Test
-    void minimalDaysInFirstWeekAlsoThrowsBecauseNoBundleIsPorted() {
-        assertThrows(java.util.MissingResourceException.class,
-            () -> provider.getMinimalDaysInFirstWeek(Locale.forLanguageTag("nb-NO")));
+    void minimalDaysInFirstWeekResolvesThroughParentChain() {
+        assertEquals(4, provider.getMinimalDaysInFirstWeek(Locale.forLanguageTag("nb-NO")));
+        assertEquals(1, provider.getMinimalDaysInFirstWeek(Locale.US));
     }
 
     @Test
-    void nullLocaleThrowsNullPointerExceptionRatherThanMissingResourceException() {
-        // The null check happens before any bundle lookup is attempted.
+    void nullLocaleThrowsNullPointerException() {
         assertThrows(NullPointerException.class, () -> provider.getFirstDayOfWeek(null));
         assertThrows(NullPointerException.class, () -> provider.getMinimalDaysInFirstWeek(null));
     }
 
     @Test
-    void everyAdvertisedLocaleHasTheSameKnownSparseDataBehavior() {
-        // CalendarData is the one category with no copied bundle, so exercise
-        // both methods for every metadata-advertised locale. This prevents a
-        // newly added locale from silently getting different failure behavior.
+    void everyAdvertisedLocaleResolvesCalendarData() {
+        // Every metadata-advertised locale now resolves both values (via its
+        // parent chain down to the base bundle); guards against a newly added
+        // locale silently losing its data.
         for (Locale locale : JreLocaleProviderTestSupport.sortedLocales(provider.getAvailableLocales())) {
-            assertThrows(java.util.MissingResourceException.class,
-                () -> provider.getFirstDayOfWeek(locale), "first day for " + locale);
-            assertThrows(java.util.MissingResourceException.class,
-                () -> provider.getMinimalDaysInFirstWeek(locale), "minimal days for " + locale);
+            assertTrue(provider.getFirstDayOfWeek(locale) >= 1, "first day for " + locale);
+            assertTrue(provider.getMinimalDaysInFirstWeek(locale) >= 1, "minimal days for " + locale);
         }
     }
 }

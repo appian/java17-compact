@@ -161,10 +161,12 @@ of every `*.java` file directly inside that folder (computed as
 | Folder | Path in OpenJDK | File Count | Folder Hash (SHA-256 of sorted per-file SHA-256s) | Last Modified in OpenJDK |
 |---|---|---|---|---|
 | sun.text.resources.ext (legacy JRE locale text resources: FormatData, CollationData, BreakIteratorInfo/Rules, JavaTimeSupplementary for ~15 non-English locales) | src/jdk.localedata/share/classes/sun/text/resources/ext/ | 260 | a55e322784e6a1f3063e1226c169919c71a95b384559e1980472f95d2f92a8af | 2021-05-26 |
-| sun.util.resources.ext (legacy JRE locale util resources: CalendarData, CurrencyNames, LocaleNames, TimeZoneNames for the same locale set) | src/jdk.localedata/share/classes/sun/util/resources/ext/ | 18 | a9e149c8fb75383a404921fcf814db77366b519f3a966c02bb8d0fdf8d71946e | 2023-01-09 |
+| sun.util.resources.ext (legacy JRE locale util resource *classes*: TimeZoneNames for ~15 non-English locales, plus the two hand-written `CurrencyNames_zh_HK`/`CurrencyNames_zh_SG`/`LocaleNames_zh_HK` `.java` bundles) | src/jdk.localedata/share/classes/sun/util/resources/ext/ (`*.java`) | 18 | a9e149c8fb75383a404921fcf814db77366b519f3a966c02bb8d0fdf8d71946e | 2023-01-09 |
+| sun.util.resources.ext (legacy JRE locale util resource *data*: the full `CalendarData_*` (55), `CurrencyNames_*` (115), and `LocaleNames_*` (54) `.properties` files) | src/jdk.localedata/share/classes/sun/util/resources/ext/ (`*.properties`) | 224 | 1583352ff878ea8779e6c6e1bef2fd25bb2d9882b22cef9d6c910d227ba2b310 | 2026-09-01 |
+| sun.util.resources (base JRE locale util resource *data*: `CalendarData`, `CalendarData_en`, `CurrencyNames`, `CurrencyNames_en_US`, `LocaleNames`, `LocaleNames_en` `.properties`) | src/java.base/share/classes/sun/util/resources/ (`*.properties`) | 6 | 9b46ff98370a5dcf40aeccfba7eac3627abfa9faaa6c26f184256258bd45ce11 | 2026-09-01 |
 | tzdata (raw IANA time-zone database text files consumed by `TzdbZoneRulesCompiler` to build `tzdb.dat`; public-domain IANA data, redistributed by OpenJDK under its own GPLv2+Classpath-exception file headers) | make/data/tzdata/ (africa, antarctica, asia, australasia, backward, etcetera, europe, gmt, jdk11_backward, northamerica, southamerica, VERSION) | 12 | df9e6a727ef0d4d58c38b6a88fa4f9a32d856140e4b0651aeba27df7428d6258 | 2026-05-28 |
 
-All copied files (individually listed + the 3 bulk folders, 384 files total)
+All copied files (individually listed + the bulk folders, 614 files total)
 were placed verbatim under
 `src/main/thirdparty/com/appiancorp/jre17/compact/thirdparty/`, mirroring
 their original OpenJDK relative path exactly, with one exception: the four
@@ -178,3 +180,25 @@ the file's *location* differs, not its content. No package renaming, reformattin
 or code changes were made in this commit; renaming into
 `com.appiancorp.jre17.compact.thirdparty` and removing JDK-internal-only
 dependencies happens in a subsequent commit.
+
+### Locale `.properties` resource bundles
+
+The `CalendarData_*`, `CurrencyNames_*`, and `LocaleNames_*` bundles above are
+copied as `.properties` data files (they carry no `package` declaration, so no
+repackaging is applied to their contents). OpenJDK does not ship these as
+`.properties` at runtime: its build compiles each one into a `ListResourceBundle`
+subclass (see `make/modules/jdk.localedata/Gensrc.gmk` and
+`make/modules/java.base/Gensrc.gmk`, `SetupCompileProperties` with
+`CLASS := sun.util.resources.LocaleNamesBundle`), because the runtime locale-data
+`ResourceBundleProvider` loads bundles by class name (`Class.forName`) rather than
+reading `.properties`. This project mirrors that step: the `generateLocaleResourceBundles`
+Gradle task (a Kotlin reimplementation of
+`make/jdk/src/classes/build/tools/compileproperties/CompileProperties.java`)
+translates every copied `.properties` file into a `public final` `ListResourceBundle`
+subclass under the repackaged
+`com.appiancorp.jre17.compact.thirdparty.sun.util.resources[.ext]` package,
+extending the repackaged `sun.util.resources.LocaleNamesBundle`, into a generated
+source directory that is compiled into the jar. The metadata generator
+(`generateLocaleDataMetaInfo`) scans both `*.java` and `*.properties` files when
+computing the per-category `LocaleDataMetaInfo` locale lists, matching
+`GensrcLocaleData.gmk`.

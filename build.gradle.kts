@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     `java-library`
 }
@@ -12,6 +14,7 @@ repositories {
 
 val thirdpartyDir = layout.projectDirectory.dir("src/main/thirdparty/com/appiancorp/jre17/compact/thirdparty")
 val localeDataMetaInfoJavaDir = layout.buildDirectory.dir("generated/sources/localeDataMetaInfo/java").get().asFile
+val localeResourceBundlesJavaDir = layout.buildDirectory.dir("generated/sources/localeResourceBundles/java").get().asFile
 val localeDataMetaInfoResourcesDir = layout.buildDirectory.dir("generated/resources/localeDataMetaInfo").get().asFile
 val tzdbResourcesDir = layout.buildDirectory.dir("generated/resources/tzdb").get().asFile
 val breakIteratorDataResourcesDir = layout.buildDirectory.dir("generated/resources/breakIteratorData").get().asFile
@@ -28,6 +31,7 @@ sourceSets {
     main {
         java.srcDir("src/main/thirdparty")
         java.srcDir(localeDataMetaInfoJavaDir)
+        java.srcDir(localeResourceBundlesJavaDir)
         resources.srcDir(localeDataMetaInfoResourcesDir)
         resources.srcDir(tzdbResourcesDir)
         resources.srcDir(breakIteratorDataResourcesDir)
@@ -65,6 +69,18 @@ val generateLocaleDataMetaInfo = tasks.register<GenerateLocaleDataMetaInfoTask>(
     utilResourcesExtDir.set(genUtilResourcesExtDir)
     javaOutDir.set(localeDataMetaInfoJavaDir)
     resourcesOutDir.set(localeDataMetaInfoResourcesDir)
+}
+
+// Mirrors make/modules/jdk.localedata/Gensrc.gmk + make/modules/java.base/Gensrc.gmk
+// (SetupCompileProperties with CLASS := sun.util.resources.LocaleNamesBundle):
+// the OpenJDK build compiles every sun/util/resources[/ext] *.properties file
+// (CurrencyNames, LocaleNames, CalendarData) into a ListResourceBundle subclass
+// so the LocaleData ResourceBundle providers -- which load bundles by class name
+// (Class.forName) rather than reading .properties at runtime -- can find them.
+val generateLocaleResourceBundles = tasks.register<GenerateLocaleResourceBundlesTask>("generateLocaleResourceBundles") {
+    baseDir.set(genUtilResourcesDir)
+    extDir.set(genUtilResourcesExtDir)
+    outDir.set(localeResourceBundlesJavaDir)
 }
 
 // Mirrors make/modules/java.base/gendata/GendataTZDB.gmk: runs
@@ -108,6 +124,7 @@ val generateBreakIteratorDataTh = tasks.register<JavaExec>("generateBreakIterato
 
 tasks.named("compileJava") {
     dependsOn(generateLocaleDataMetaInfo)
+    dependsOn(generateLocaleResourceBundles)
 }
 
 tasks.named("processResources") {
@@ -156,8 +173,11 @@ abstract class GenerateLocaleDataMetaInfoTask : DefaultTask() {
         fun scanLocales(dir: File, category: String): Set<String> {
             val prefix = "${category}_"
             if (!dir.exists()) return emptySet()
-            return dir.listFiles { f -> f.isFile && f.name.startsWith(prefix) && f.name.endsWith(".java") }
-                ?.map { it.name.removePrefix(prefix).removeSuffix(".java").replace('_', '-') }
+            // Mirrors GensrcLocaleData.gmk, which scans both *.java and
+            // *.properties resource-bundle files for each category.
+            return dir.listFiles { f -> f.isFile && f.name.startsWith(prefix) &&
+                    (f.name.endsWith(".java") || f.name.endsWith(".properties")) }
+                ?.map { it.name.removePrefix(prefix).removeSuffix(".java").removeSuffix(".properties").replace('_', '-') }
                 ?.toSet() ?: emptySet()
         }
 
@@ -196,6 +216,13 @@ abstract class GenerateLocaleDataMetaInfoTask : DefaultTask() {
             allBaseLocales.addAll(base)
             allNonBaseLocales.addAll(nonBase)
         }
+
+        // Mirrors GensrcLocaleData.gmk `ALL_NON_BASE_LOCALES := ja-JP-JP th-TH-TH`:
+        // these two special variant locales (Japanese imperial calendar and Thai
+        // Buddhist/Thai-digits) are always advertised in the NonBase AvailableLocales
+        // list even though they have no dedicated resource-bundle files.
+        allNonBaseLocales.add("ja-JP-JP")
+        allNonBaseLocales.add("th-TH-TH")
 
         val templateText = templateFile.get().asFile.readText()
 
@@ -239,3 +266,93 @@ abstract class GenerateLocaleDataMetaInfoTask : DefaultTask() {
     }
 }
 
+
+// Replicates make/jdk/src/classes/build/tools/compileproperties/CompileProperties:
+// translates a .properties resource bundle into a ListResourceBundle subclass,
+// extending the repackaged sun.util.resources.LocaleNamesBundle, with keys sorted
+// and values escaped to ASCII Java string literals. Emits into a generated source
+// dir that is added to the main Java source set.
+abstract class GenerateLocaleResourceBundlesTask : DefaultTask() {
+    @get:InputDirectory
+    abstract val baseDir: DirectoryProperty
+
+    @get:InputDirectory
+    abstract val extDir: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outDir: DirectoryProperty
+
+    private val pkgRoot = "com.appiancorp.jre17.compact.thirdparty.sun.util.resources"
+    private val superClass = "com.appiancorp.jre17.compact.thirdparty.sun.util.resources.LocaleNamesBundle"
+
+    @TaskAction
+    fun generate() {
+        val out = outDir.get().asFile
+        out.deleteRecursively()
+        out.mkdirs()
+        var count = 0
+        count += gen(baseDir.get().asFile, pkgRoot, out)
+        count += gen(extDir.get().asFile, "$pkgRoot.ext", out)
+        logger.lifecycle("Generated $count locale resource bundle classes from .properties")
+    }
+
+    private fun gen(dir: File, pkg: String, out: File): Int {
+        if (!dir.exists()) return 0
+        // Skip any .properties whose ListResourceBundle .java is already checked in
+        // (e.g. CurrencyNames_zh_HK), mirroring the makefile's filter-out of _zh_HK.
+        val existingJava = dir.listFiles { f -> f.name.endsWith(".java") }
+            ?.map { it.name.removeSuffix(".java") }?.toSet() ?: emptySet()
+        val pkgDir = File(out, pkg.replace('.', '/'))
+        pkgDir.mkdirs()
+        var n = 0
+        dir.listFiles { f -> f.isFile && f.name.endsWith(".properties") }
+            ?.sortedBy { it.name }
+            ?.forEach { pf ->
+                val className = pf.name.removeSuffix(".properties")
+                if (className in existingJava) return@forEach
+                val props = Properties()
+                pf.inputStream().use { props.load(it) }
+                val keys = props.stringPropertyNames().sorted()
+                val sb = StringBuilder()
+                sb.append("package ").append(pkg).append(";\n\n")
+                sb.append("public final class ").append(className)
+                    .append(" extends ").append(superClass).append(" {\n")
+                sb.append("    protected final Object[][] getContents() {\n")
+                sb.append("        return new Object[][] {\n")
+                for (k in keys) {
+                    sb.append("            { \"").append(escape(k)).append("\", \"")
+                        .append(escape(props.getProperty(k))).append("\" },\n")
+                }
+                sb.append("        };\n    }\n}\n")
+                File(pkgDir, "$className.java").writeText(sb.toString(), Charsets.ISO_8859_1)
+                n++
+            }
+        return n
+    }
+
+    // Mirrors CompileProperties.escape: escape for a Java string literal and
+    // force non-ASCII characters to \\uXXXX so the source is pure ASCII.
+    private fun escape(s: String): String {
+        val out = StringBuilder(s.length * 2)
+        for (c in s) {
+            when (c) {
+                '\\' -> out.append("\\\\")
+                '\t' -> out.append("\\t")
+                '\n' -> out.append("\\n")
+                '\r' -> out.append("\\r")
+                '\u000C' -> out.append("\\f")
+                '"' -> out.append("\\\"")
+                else -> if (c.code < 0x0020 || c.code > 0x007e) {
+                    out.append("\\u")
+                    out.append("0123456789ABCDEF"[(c.code shr 12) and 0xF])
+                    out.append("0123456789ABCDEF"[(c.code shr 8) and 0xF])
+                    out.append("0123456789ABCDEF"[(c.code shr 4) and 0xF])
+                    out.append("0123456789ABCDEF"[c.code and 0xF])
+                } else {
+                    out.append(c)
+                }
+            }
+        }
+        return out.toString()
+    }
+}
