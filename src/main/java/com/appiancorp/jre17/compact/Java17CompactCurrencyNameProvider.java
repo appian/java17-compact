@@ -12,9 +12,18 @@ public class Java17CompactCurrencyNameProvider extends CurrencyNameProvider {
 
   private final CurrencyNameProvider delegate = LocaleProviderAdapter.forJRE().getCurrencyNameProvider();
 
+  // Broadened to include country variants so this provider is selected (ahead of
+  // CLDR) for country locales under java.locale.providers=SPI,CLDR. See CompactLocaleSupport.
+  private final Locale[] availableLocales = CompactLocaleSupport.withCountryVariants(delegate.getAvailableLocales());
+
   @Override
   public Locale[] getAvailableLocales() {
-    return delegate.getAvailableLocales();
+    return availableLocales.clone();
+  }
+
+  @Override
+  public boolean isSupportedLocale(Locale locale) {
+    return CompactLocaleSupport.isSupportedLocale(delegate, locale);
   }
 
   @Override

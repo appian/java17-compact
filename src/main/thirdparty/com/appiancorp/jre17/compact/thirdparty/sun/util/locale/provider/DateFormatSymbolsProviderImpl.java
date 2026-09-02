@@ -27,7 +27,9 @@ package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;
 
 import java.text.DateFormatSymbols;
 import java.text.spi.DateFormatSymbolsProvider;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -43,14 +45,17 @@ public class DateFormatSymbolsProviderImpl extends DateFormatSymbolsProvider imp
     private final LocaleProviderAdapter.Type type;
     private final Set<String> langtags;
 
-    // Zone strings are normally resolved lazily by java.text.DateFormatSymbols.getZoneStrings()
-    // through sun.util.locale.provider.TimeZoneNameUtility. When this ported stack runs as an
-    // SPI drop-in on a newer JDK, that lazy path resolves against the *host* runtime's CLDR data
-    // instead of the ported JDK 17 JRE/COMPAT TimeZoneNames, dropping legacy zone abbreviations
-    // such as LINT and IRDT (so SimpleDateFormat could no longer parse them). We therefore
-    // populate zoneStrings eagerly from the ported JRE resources below. Cache per locale since
-    // getZoneStrings() rebuilds the ~600-row array on every call.
-    private final ConcurrentMap<Locale, String[][]> zoneStringsCache = new ConcurrentHashMap<>();
+    // java.text.DateFormatSymbols loads its era/month/weekday/am-pm/zone data in its
+    // constructor from whatever LocaleProviderAdapter the *host* runtime selects. When
+    // this ported stack runs as an SPI drop-in on a newer JDK, that data comes from the
+    // host's CLDR (or, with java.locale.providers=SPI only, the root/English fallback)
+    // rather than the ported JDK 17 JRE/COMPAT FormatData -- e.g. German "MMM" for March
+    // yields the CLDR "März" (or English "Mar") instead of the JDK 17 "Mär", and zone
+    // abbreviations such as LINT/IRDT are lost. We therefore build the DateFormatSymbols
+    // explicitly from the ported JRE resources (see createFromJreResources, which mirrors
+    // java.text.DateFormatSymbols#initializeData). Cache the built instance per locale and
+    // hand out clones, since getInstance must return a fresh, caller-mutable instance.
+    private final ConcurrentMap<Locale, DateFormatSymbols> cache = new ConcurrentHashMap<>();
 
     public DateFormatSymbolsProviderImpl(LocaleProviderAdapter.Type type, Set<String> langtags) {
         this.type = type;
@@ -92,11 +97,57 @@ public class DateFormatSymbolsProviderImpl extends DateFormatSymbolsProvider imp
         if (locale == null) {
             throw new NullPointerException();
         }
+        return (DateFormatSymbols) cache.computeIfAbsent(locale, this::createFromJreResources).clone();
+    }
 
+    /**
+     * Builds a {@code DateFormatSymbols} entirely from the ported JRE resources,
+     * mirroring the field mapping of {@code java.text.DateFormatSymbols#initializeData}
+     * so the result matches JDK 17 JRE/COMPAT rather than the host runtime's locale data.
+     */
+    private DateFormatSymbols createFromJreResources(Locale locale) {
         DateFormatSymbols dfs = new DateFormatSymbols(locale);
-        dfs.setZoneStrings(zoneStringsCache.computeIfAbsent(locale,
-                loc -> LocaleProviderAdapter.forType(type).getLocaleResources(loc).getZoneStrings()));
+        LocaleProviderAdapter adapter = LocaleProviderAdapter.forType(type);
+        ResourceBundle rb = ((ResourceBundleBasedAdapter) adapter).getLocaleData().getDateFormatData(locale);
+
+        if (rb.containsKey("Eras")) {
+            dfs.setEras(rb.getStringArray("Eras"));
+        } else if (rb.containsKey("long.Eras")) {
+            dfs.setEras(rb.getStringArray("long.Eras"));
+        } else if (rb.containsKey("short.Eras")) {
+            dfs.setEras(rb.getStringArray("short.Eras"));
+        }
+
+        dfs.setMonths(rb.getStringArray("MonthNames"));
+        dfs.setShortMonths(rb.getStringArray("MonthAbbreviations"));
+
+        String[] ampms = rb.getStringArray("AmPmMarkers");
+        if (ampms.length > 2) {
+            ampms = Arrays.copyOf(ampms, 2);
+        }
+        dfs.setAmPmStrings(ampms);
+
+        if (rb.containsKey("DateTimePatternChars")) {
+            dfs.setLocalPatternChars(rb.getString("DateTimePatternChars"));
+        }
+
+        dfs.setWeekdays(toOneBasedArray(rb.getStringArray("DayNames")));
+        dfs.setShortWeekdays(toOneBasedArray(rb.getStringArray("DayAbbreviations")));
+
+        dfs.setZoneStrings(adapter.getLocaleResources(locale).getZoneStrings());
         return dfs;
+    }
+
+    /**
+     * java.text.DateFormatSymbols stores weekday arrays one-based (index 0 unused,
+     * indices Calendar.SUNDAY..SATURDAY populated); FormatData supplies 0-based length-7
+     * arrays.
+     */
+    private static String[] toOneBasedArray(String[] src) {
+        String[] dst = new String[src.length + 1];
+        dst[0] = "";
+        System.arraycopy(src, 0, dst, 1, src.length);
+        return dst;
     }
 
     @Override

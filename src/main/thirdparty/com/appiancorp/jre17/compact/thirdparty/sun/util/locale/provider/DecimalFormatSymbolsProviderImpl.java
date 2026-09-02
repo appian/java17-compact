@@ -29,6 +29,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.spi.DecimalFormatSymbolsProvider;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Concrete implementation of the  {@link java.text.spi.DecimalFormatSymbolsProvider
@@ -40,6 +42,14 @@ import java.util.Set;
 public class DecimalFormatSymbolsProviderImpl extends DecimalFormatSymbolsProvider implements AvailableLanguageTags {
     private final LocaleProviderAdapter.Type type;
     private final Set<String> langtags;
+
+    // java.text.DecimalFormatSymbols loads its number symbols in its constructor from
+    // whatever LocaleProviderAdapter the *host* runtime selects. As an SPI drop-in on a
+    // newer JDK that means the CLDR (or, with providers=SPI only, root/English) number
+    // elements -- decimal/grouping separators etc. -- instead of the ported JDK 17
+    // JRE/COMPAT values. We rebuild those fields from the ported JRE NumberElements (see
+    // createFromJreResources). Cache per locale and hand out clones.
+    private final ConcurrentMap<Locale, DecimalFormatSymbols> cache = new ConcurrentHashMap<>();
 
     public DecimalFormatSymbolsProviderImpl(LocaleProviderAdapter.Type type, Set<String> langtags) {
         this.type = type;
@@ -81,8 +91,39 @@ public class DecimalFormatSymbolsProviderImpl extends DecimalFormatSymbolsProvid
         if (locale == null) {
             throw new NullPointerException();
         }
+        return (DecimalFormatSymbols) cache.computeIfAbsent(locale, this::createFromJreResources).clone();
+    }
 
-        return new DecimalFormatSymbols(locale);
+    /**
+     * Rebuilds the number-element fields of a {@code DecimalFormatSymbols} from the ported
+     * JRE NumberElements, mirroring {@code java.text.DecimalFormatSymbols#initialize}. The
+     * currency symbol fields are left as populated by {@code new DecimalFormatSymbols} since
+     * they are derived from {@code java.util.Currency}/the currency-name providers rather
+     * than the number-format resource bundle.
+     */
+    private DecimalFormatSymbols createFromJreResources(Locale locale) {
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols(locale);
+        String[] ne = (String[]) LocaleProviderAdapter.forType(type)
+            .getLocaleResources(locale).getDecimalFormatSymbolsData()[0];
+
+        char decimalSeparator = ne[0].charAt(0);
+        char groupingSeparator = ne[1].charAt(0);
+        dfs.setDecimalSeparator(decimalSeparator);
+        dfs.setGroupingSeparator(groupingSeparator);
+        dfs.setPatternSeparator(ne[2].charAt(0));
+        dfs.setPercent(ne[3].charAt(0));
+        dfs.setZeroDigit(ne[4].charAt(0));
+        dfs.setDigit(ne[5].charAt(0));
+        dfs.setMinusSign(ne[6].charAt(0));
+        dfs.setExponentSeparator(ne[7]);
+        dfs.setPerMill(ne[8].charAt(0));
+        dfs.setInfinity(ne[9]);
+        dfs.setNaN(ne[10]);
+        dfs.setMonetaryDecimalSeparator(
+            ne.length < 12 || ne[11].isEmpty() ? decimalSeparator : ne[11].charAt(0));
+        dfs.setMonetaryGroupingSeparator(
+            ne.length < 13 || ne[12].isEmpty() ? groupingSeparator : ne[12].charAt(0));
+        return dfs;
     }
 
     @Override
