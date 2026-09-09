@@ -46,3 +46,12 @@ The jar is written to `build/libs/com.appiancorp.jre17.compact-1.0.0.jar`.
 
 `LegacyDouble` / `LegacyFloat` reproduce JDK 17's `Double.toString` /
 `Float.toString` output via the ported `FloatingDecimal`.
+
+## License / third-party notices
+
+This project contains a derivative work of [OpenJDK](https://github.com/openjdk/jdk17u),
+licensed under the GNU General Public License, version 2, with the Classpath
+Exception. See [LICENSE](LICENSE) for the full license text and
+[NOTICE.md](NOTICE.md) for the derivative-work statement and the list of
+modified files. Full per-file provenance (original OpenJDK path, copyright,
+and SHA-256 hash) is in [src/main/thirdparty/README.md](src/main/thirdparty/README.md).

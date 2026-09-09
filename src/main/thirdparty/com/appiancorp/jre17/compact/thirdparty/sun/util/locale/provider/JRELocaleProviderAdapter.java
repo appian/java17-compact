@@ -22,7 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  *
- * Modified by Appian Corp., 2026.
+ */
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Repackaged from sun.util.locale.provider to com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider; adjusted installed-locale lookup to search this library's class loader instead of the JDK's own module/platform class loader layout.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
  */
 
 package com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider;

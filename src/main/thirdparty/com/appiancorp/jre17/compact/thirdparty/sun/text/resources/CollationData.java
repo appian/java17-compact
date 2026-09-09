@@ -40,6 +40,16 @@
  * Taligent is a registered trademark of Taligent, Inc.
  *
  */
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Repackaged from sun.text.resources to com.appiancorp.jre17.compact.thirdparty.sun.text.resources; changed to extend the new AppianListResourceBundle instead of java.util.ListResourceBundle directly, for AppianResourceBundleState support.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 
 package com.appiancorp.jre17.compact.thirdparty.sun.text.resources;
 

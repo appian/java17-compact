@@ -22,6 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Repackaged from sun.* to com.appiancorp.jre17.compact.thirdparty.sun.*; package declaration and imports updated accordingly. No other changes.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 
 package com.appiancorp.jre17.compact.thirdparty.sun.util.resources.ext;
 
