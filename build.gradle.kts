@@ -48,6 +48,7 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+    withSourcesJar()
 }
 
 // Mirrors make/modules/java.base/gensrc/GensrcLocaleData.gmk: scans for
@@ -126,6 +127,14 @@ val generateBreakIteratorDataTh = tasks.register<JavaExec>("generateBreakIterato
 tasks.named("compileJava") {
     dependsOn(generateLocaleDataMetaInfo)
     dependsOn(generateLocaleResourceBundles)
+}
+
+tasks.named("sourcesJar") {
+    dependsOn(generateLocaleDataMetaInfo)
+    dependsOn(generateLocaleResourceBundles)
+    dependsOn(generateTzdbDat)
+    dependsOn(generateBreakIteratorDataBase)
+    dependsOn(generateBreakIteratorDataTh)
 }
 
 tasks.named("processResources") {
