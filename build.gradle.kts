@@ -2,11 +2,12 @@ import java.util.Properties
 
 plugins {
     `java-library`
+    `maven-publish`
 }
 
 group = "com.appiancorp.jre17.compact"
 description = "Library which contains Utilities for JRE17 compatibility"
-version = "1.0.0"
+version = providers.gradleProperty("publishVersion").getOrElse("1.0.0")
 
 repositories {
     mavenCentral()
@@ -133,6 +134,32 @@ tasks.named("processResources") {
 
 tasks.named<Jar>("jar") {
     archiveBaseName.set("com.appiancorp.jre17.compact")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+            artifactId = "locale-provider"
+        }
+    }
+    repositories {
+        maven {
+            url = uri(
+                providers.gradleProperty("mavenRepoUrl")
+                    .orElse(providers.environmentVariable("MAVEN_REPO_URL"))
+                    .getOrElse(layout.buildDirectory.dir("unset-maven-repo-url").get().asFile.toURI().toString())
+            )
+            credentials {
+                username = providers.gradleProperty("mavenRepoUsername")
+                    .orElse(providers.environmentVariable("MAVEN_REPO_USERNAME"))
+                    .orNull
+                password = providers.gradleProperty("mavenRepoPassword")
+                    .orElse(providers.environmentVariable("MAVEN_REPO_PASSWORD"))
+                    .orNull
+            }
+        }
+    }
 }
 
 tasks.named<Test>("test") {
