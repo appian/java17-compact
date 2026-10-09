@@ -1,12 +1,25 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Tests Java17CompactBreakIteratorProvider against the repackaged JDK 17 JRE/COMPAT implementation for every locale the JRE data ships, plus the behavior specific to this provider. Includes the Thai dictionary-based word and line iterators.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.text.BreakIterator;
 import java.text.spi.BreakIteratorProvider;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
@@ -65,17 +78,24 @@ class Java17CompactBreakIteratorProviderTest {
     }
 
     @Test
-    void thaiLocaleUsesItsOwnRuleBasedBreakIteratorData() {
-        // Thai is the one locale in this codebase with its own break-iterator
-        // data -- see generateBreakIteratorDataTh in build.gradle.kts. Its word/line
-        // break classes are dictionary-based and require the binary "thai_dict"
-        // resource, which has not been ported into this repository, so this
-        // exercises the character-break iterator instead, which for Thai is
-        // rule-based (RuleBasedBreakIterator) and needs no such dictionary.
-        BreakIterator iterator = provider.getCharacterInstance(Locale.forLanguageTag("th"));
-        iterator.setText("\u0e2a\u0e27\u0e31\u0e2a\u0e14\u0e35");
-        assertTrue(iterator.first() >= 0);
-        assertTrue(iterator.next() > iterator.first());
+    void thaiLocaleUsesItsOwnDictionaryBasedBreakIteratorData() {
+        // Thai is the one locale with its own break-iterator data -- see
+        // generateBreakIteratorDataTh in build.gradle.kts. Its word/line iterators are
+        // dictionary-based and need the binary "thai_dict" resource; without it they failed with
+        // InternalError("Can't load .../ext/thai_dict"). Expected boundaries were captured from
+        // JDK 17 with java.locale.providers=JRE.
+        Locale thai = Locale.forLanguageTag("th");
+        String text = "Hello, w\u00f6rld! \u0e2a\u0e27\u0e31\u0e2a\u0e14\u0e35\u0e04\u0e23\u0e31\u0e1a"
+            + " \u65e5\u672c\u8a9e it's 3.14";
+        BreakIterator word = provider.getWordInstance(thai);
+        word.setText(text);
+        List<Integer> boundaries = new ArrayList<>();
+        for (int b = word.next(); b != BreakIterator.DONE; b = word.next()) {
+            boundaries.add(b);
+        }
+        assertEquals(List.of(5, 6, 7, 12, 13, 14, 20, 24, 25, 28, 29, 33, 34, 38), boundaries);
+        assertNotNull(provider.getLineInstance(thai));
+        assertNotNull(provider.getCharacterInstance(thai));
     }
 
     @Test
@@ -95,20 +115,10 @@ class Java17CompactBreakIteratorProviderTest {
             JreLocaleProviderTestSupport.assertBreakIteratorMatches("character", locale,
                 () -> provider.getCharacterInstance(locale), () -> jreProvider.getCharacterInstance(locale));
 
-            // The port intentionally lacks OpenJDK's thai_dict resource. The JRE
-            // word/line iterators therefore fail at construction for Thai, while
-            // the rule-based character/sentence iterators above remain comparable.
-            if (!locale.getLanguage().equals("th")) {
-                JreLocaleProviderTestSupport.assertBreakIteratorMatches("word", locale,
-                    () -> provider.getWordInstance(locale), () -> jreProvider.getWordInstance(locale));
-                JreLocaleProviderTestSupport.assertBreakIteratorMatches("line", locale,
-                    () -> provider.getLineInstance(locale), () -> jreProvider.getLineInstance(locale));
-            } else {
-                    assertThrows(java.lang.InternalError.class,
-                        () -> provider.getWordInstance(locale));
-                assertThrows(java.lang.InternalError.class,
-                    () -> provider.getLineInstance(locale));
-            }
+            JreLocaleProviderTestSupport.assertBreakIteratorMatches("word", locale,
+                () -> provider.getWordInstance(locale), () -> jreProvider.getWordInstance(locale));
+            JreLocaleProviderTestSupport.assertBreakIteratorMatches("line", locale,
+                () -> provider.getLineInstance(locale), () -> jreProvider.getLineInstance(locale));
         }
     }
 }

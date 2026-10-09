@@ -213,3 +213,16 @@ source directory that is compiled into the jar. The metadata generator
 (`generateLocaleDataMetaInfo`) scans both `*.java` and `*.properties` files when
 computing the per-category `LocaleDataMetaInfo` locale lists, matching
 `GensrcLocaleData.gmk`.
+
+## Thai word-break dictionary (binary resource)
+
+`thai_dict` is the dictionary read by the Thai `DictionaryBasedBreakIterator`
+(`BreakIteratorInfo_th` -> `WordDictionary` / `LineDictionary`). It is a binary
+resource, so unlike the sources above it is packaged from
+`src/main/resources/com/appiancorp/jre17/compact/thirdparty/sun/text/resources/ext/thai_dict`
+(a byte-for-byte copy, unmodified). Without it, `BreakIterator` for `th` fails with
+`InternalError: Can't load .../ext/thai_dict`.
+
+| File | Path in OpenJDK | License | Copyright | File Hash (SHA-256) | Last Modified in OpenJDK |
+|---|---|---|---|---|---|
+| thai_dict | src/jdk.localedata/share/classes/sun/text/resources/ext/thai_dict | Thai Dictionary License (see `src/jdk.localedata/share/legal/thaidict.md` in OpenJDK) | The Royal Institute, Thai Royal Government (1982); NECTEC (1998) | c5129c3875aecbdf860005efb4a720d94eddbd19e5ea63bbc1f0d378a9482e7a | 2017-09-12 |

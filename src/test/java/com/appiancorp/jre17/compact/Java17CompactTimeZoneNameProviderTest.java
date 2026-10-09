@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Tests Java17CompactTimeZoneNameProvider against the repackaged JDK 17 JRE/COMPAT implementation for every locale the JRE data ships, plus the behavior specific to this provider.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,26 +65,6 @@ class Java17CompactTimeZoneNameProviderTest {
     void unknownTimeZoneIdReturnsNull() {
         String name = provider.getDisplayName("Not/A_Real_Zone", false, TimeZone.LONG, Locale.UK);
         assertEquals(null, name);
-    }
-
-    // Regression: the provider must advertise and support country/region variants
-    // of the languages it serves (e.g. en_US), not just the language-level locale
-    // (en). Otherwise, when used as an SPI drop-in with java.locale.providers=
-    // SPI,CLDR, the JDK's SPILocaleProviderAdapter delegate skips this provider at
-    // the en_US candidate (its isSupportedLocale is a direct map lookup with no
-    // language fallback) and CLDR shadows it with a GMT-offset short name, breaking
-    // JDK 17 COMPAT zone-name parity (e.g. Pacific/Kiritimati -> GMT+14:00 instead
-    // of LINT). See Java17CompactTimeZoneNameProvider#getAvailableLocales.
-    @Test
-    void advertisesCountryVariantsOfSupportedLanguages() {
-        assertTrue(Arrays.asList(provider.getAvailableLocales()).contains(Locale.US),
-            "getAvailableLocales() must include en_US so the SPI delegate registers it");
-    }
-
-    @Test
-    void supportsCountryVariantOfSupportedLanguage() {
-        assertTrue(provider.isSupportedLocale(Locale.US));
-        assertTrue(provider.isSupportedLocale(Locale.ENGLISH));
     }
 
     @Test

@@ -63,3 +63,18 @@ Two additional files under `src/main/thirdparty/com/appiancorp/jre17/compact/uti
 (`AppianListResourceBundle.java`, `AppianResourceBundleState.java`) are
 original Appian code, not derived from OpenJDK, and carry an ordinary
 Appian copyright header rather than a GPLv2 modification notice.
+
+## Thai dictionary
+
+`src/main/resources/com/appiancorp/jre17/compact/thirdparty/sun/text/resources/ext/thai_dict`
+is an unmodified copy of OpenJDK's `thai_dict`, which is distributed under the
+Thai Dictionary License:
+
+> Copyright (C) 1982 The Royal Institute, Thai Royal Government.
+>
+> Copyright (C) 1998 National Electronics and Computer Technology Center,
+> National Science and Technology Development Agency,
+> Ministry of Science Technology and Environment,
+> Thai Royal Government.
+
+The full license text is in OpenJDK's `src/jdk.localedata/share/legal/thaidict.md`.

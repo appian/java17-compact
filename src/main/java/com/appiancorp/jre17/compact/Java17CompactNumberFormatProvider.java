@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Implements java.text.spi.NumberFormatProvider by delegating to the repackaged JDK 17 JRE/COMPAT provider (com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider), so a newer JDK can reproduce JDK 17 locale data when this jar is installed as an SPI provider. Also implements getCompactNumberInstance, which the SPI base class otherwise rejects with UnsupportedOperationException.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import java.text.NumberFormat;
@@ -13,9 +23,7 @@ public class Java17CompactNumberFormatProvider extends NumberFormatProvider {
 
   private final NumberFormatProvider delegate = LocaleProviderAdapter.forJRE().getNumberFormatProvider();
 
-  // Broadened to include country variants so this provider is selected (ahead of
-  // CLDR) for country locales under java.locale.providers=SPI,CLDR. See CompactLocaleSupport.
-  private final Locale[] availableLocales = CompactLocaleSupport.withCountryVariants(delegate.getAvailableLocales());
+  private final Locale[] availableLocales = delegate.getAvailableLocales();
 
   @Override
   public Locale[] getAvailableLocales() {
@@ -24,7 +32,15 @@ public class Java17CompactNumberFormatProvider extends NumberFormatProvider {
 
   @Override
   public boolean isSupportedLocale(Locale locale) {
-    return CompactLocaleSupport.isSupportedLocale(delegate, locale);
+    return delegate.isSupportedLocale(locale);
+  }
+
+  // NumberFormatProvider#getCompactNumberInstance (JDK 12+) throws
+  // UnsupportedOperationException unless overridden. JDK 17's JRE provider implemented it, so
+  // without this override a compact number request would fail here instead of being answered.
+  @Override
+  public NumberFormat getCompactNumberInstance(Locale locale, NumberFormat.Style formatStyle) {
+    return delegate.getCompactNumberInstance(locale, formatStyle);
   }
 
   @Override

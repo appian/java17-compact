@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Tests Java17CompactLocaleNameProvider against the repackaged JDK 17 JRE/COMPAT implementation for every locale the JRE data ships, plus the behavior specific to this provider.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,6 +22,8 @@ import java.util.spi.LocaleNameProvider;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 // The full set of JDK 17 JRE/COMPAT LocaleNames resource bundles is now ported
 // (CurrencyNames/LocaleNames/CalendarData .properties compiled to
 // ListResourceBundle subclasses, plus the en/en-US/root base bundles), so
@@ -21,6 +33,7 @@ import org.junit.jupiter.api.Test;
 class Java17CompactLocaleNameProviderTest {
 
     private final LocaleNameProvider provider = new Java17CompactLocaleNameProvider();
+    private final LocaleNameProvider jreProvider = LocaleProviderAdapter.forJRE().getLocaleNameProvider();
 
     private static final Locale HONG_KONG = Locale.forLanguageTag("zh-HK");
 
@@ -55,6 +68,23 @@ class Java17CompactLocaleNameProviderTest {
         // en/en-US base bundles are now present, so English names resolve.
         assertEquals("French", provider.getDisplayLanguage("fr", Locale.US));
         assertEquals("France", provider.getDisplayCountry("FR", Locale.US));
+    }
+
+    @Test
+    void unicodeExtensionNamesMatchJre() {
+        assertEquals(jreProvider.getDisplayUnicodeExtensionKey("ca", Locale.US),
+            provider.getDisplayUnicodeExtensionKey("ca", Locale.US));
+        assertEquals(jreProvider.getDisplayUnicodeExtensionType("japanese", "ca", Locale.US),
+            provider.getDisplayUnicodeExtensionType("japanese", "ca", Locale.US));
+    }
+
+    @Test
+    void displayScriptMatchesJre() {
+        // LocaleNameProvider#getDisplayScript defaults to null; without the override, script
+        // names ("Latin", "Simplified Han") are not answered at all.
+        assertEquals(jreProvider.getDisplayScript("Latn", Locale.US), provider.getDisplayScript("Latn", Locale.US));
+        assertEquals(jreProvider.getDisplayScript("Hans", Locale.CHINA), provider.getDisplayScript("Hans", Locale.CHINA));
+        assertNotNull(provider.getDisplayScript("Latn", Locale.US));
     }
 
     @Test

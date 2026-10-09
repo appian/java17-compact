@@ -11,7 +11,7 @@ JDK after 18/20) and exposes it as standard locale Service Provider Interface
 
 The jar registers implementations for all eleven locale SPIs via committed
 `META-INF/services` files, so it is a genuine **drop-in**: put the jar on the
-class path and put `SPI` first in `java.locale.providers`.
+system class path and set `java.locale.providers=SPI`.
 
 Registered providers:
 
@@ -23,16 +23,21 @@ Registered providers:
 
 ### Usage
 
+Replace `-Djava.locale.providers=JRE,SPI` (JDK 17) with `-Djava.locale.providers=SPI`:
+
 ```sh
-java -Djava.locale.providers=SPI,CLDR \
+java -Djava.locale.providers=SPI \
   -cp 'com.appiancorp.jre17.compact.jar:application.jar' \
   com.example.Application
 ```
 
-With `SPI,CLDR`, the JDK consults these providers first (JDK 17 JRE/COMPAT
-data) and falls back to CLDR for anything they do not supply. For example, on a
-JDK 25/26 runtime the symbol for `TWD` in `zh-HK` resolves to `TWD` (JDK 17
-JRE/COMPAT behavior) instead of the CLDR value `NT$`.
+- The jar must be on the **system class path**. The JDK loads SPI providers only through the
+  system class loader, so `WEB-INF/lib` of a web application is not enough.
+- Do **not** add `CLDR` (`SPI,CLDR`). CLDR answers every locale the jar does not list exactly and
+  supplies the join patterns for `Locale#getDisplayName`, so results no longer match JDK 17.
+
+With `SPI` the output matches JDK 17 `JRE,SPI`. The one known difference is the name of a Unicode
+`rg` extension (`fr_FR-u-rg-chzzzz`): "Switzerland" instead of "Suisse".
 
 ## Build
 

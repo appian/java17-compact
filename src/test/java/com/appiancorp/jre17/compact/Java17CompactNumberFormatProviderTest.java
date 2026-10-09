@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Tests Java17CompactNumberFormatProvider against the repackaged JDK 17 JRE/COMPAT implementation for every locale the JRE data ships, plus the behavior specific to this provider.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,6 +69,20 @@ class Java17CompactNumberFormatProviderTest {
         // exact grouping character (narrow no-break space vs. regular space across
         // JDK/CLDR versions).
         assertTrue(format.format(1234.5).contains(","));
+    }
+
+    @Test
+    void compactNumberInstanceIsSupported() {
+        // NumberFormatProvider#getCompactNumberInstance throws UnsupportedOperationException
+        // unless overridden; JDK 17's JRE provider supported it.
+        for (Locale locale : new Locale[] { Locale.US, Locale.FRANCE, Locale.GERMANY, Locale.JAPAN }) {
+            for (NumberFormat.Style style : NumberFormat.Style.values()) {
+                NumberFormat actual = provider.getCompactNumberInstance(locale, style);
+                NumberFormat expected = jreProvider.getCompactNumberInstance(locale, style);
+                assertEquals(expected.format(1234567), actual.format(1234567), style + " for " + locale);
+            }
+        }
+        assertEquals("1M", provider.getCompactNumberInstance(Locale.US, NumberFormat.Style.SHORT).format(1234567));
     }
 
     @Test

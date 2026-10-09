@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Tests Java17CompactCalendarDataProvider against the repackaged JDK 17 JRE/COMPAT implementation for every locale the JRE data ships, plus the behavior specific to this provider.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +20,8 @@ import java.util.spi.CalendarDataProvider;
 
 import org.junit.jupiter.api.Test;
 
+import com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider.LocaleProviderAdapter;
+
 // The full set of JDK 17 JRE/COMPAT CalendarData resource bundles is now ported
 // (CalendarData*.properties compiled to ListResourceBundle subclasses, plus the
 // root/en base bundles), so firstDayOfWeek / minimalDaysInFirstWeek resolve for
@@ -19,6 +31,7 @@ import org.junit.jupiter.api.Test;
 class Java17CompactCalendarDataProviderTest {
 
     private final CalendarDataProvider provider = new Java17CompactCalendarDataProvider();
+    private final CalendarDataProvider jreProvider = LocaleProviderAdapter.forJRE().getCalendarDataProvider();
 
     @Test
     void getAvailableLocalesIsNonEmpty() {

@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2026 Appian Corporation. All rights reserved.
+ *
+ * This file has been modified by Appian Corporation on 2026-08-29.
+ * Brief description of changes: Appian-original code (not derived from OpenJDK source). Implements java.util.spi.CurrencyNameProvider by delegating to the repackaged JDK 17 JRE/COMPAT provider (com.appiancorp.jre17.compact.thirdparty.sun.util.locale.provider), so a newer JDK can reproduce JDK 17 locale data when this jar is installed as an SPI provider.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, with
+ * the Classpath Exception, as published by the Free Software Foundation.
+ */
 package com.appiancorp.jre17.compact;
 
 import java.util.Locale;
@@ -12,9 +22,7 @@ public class Java17CompactCurrencyNameProvider extends CurrencyNameProvider {
 
   private final CurrencyNameProvider delegate = LocaleProviderAdapter.forJRE().getCurrencyNameProvider();
 
-  // Broadened to include country variants so this provider is selected (ahead of
-  // CLDR) for country locales under java.locale.providers=SPI,CLDR. See CompactLocaleSupport.
-  private final Locale[] availableLocales = CompactLocaleSupport.withCountryVariants(delegate.getAvailableLocales());
+  private final Locale[] availableLocales = delegate.getAvailableLocales();
 
   @Override
   public Locale[] getAvailableLocales() {
@@ -23,7 +31,7 @@ public class Java17CompactCurrencyNameProvider extends CurrencyNameProvider {
 
   @Override
   public boolean isSupportedLocale(Locale locale) {
-    return CompactLocaleSupport.isSupportedLocale(delegate, locale);
+    return delegate.isSupportedLocale(locale);
   }
 
   @Override
